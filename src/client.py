@@ -7,8 +7,10 @@ if __name__ == '__main__':
     server_address = ('127.0.0.1', 7777)
     s.connect(server_address)
 
-    s.send('Markus')
     while True:
-        message = s.recv(rsp.BUFFER_SIZE)
-        print('Message received: ', message)
+        send_message = raw_input()
+        print('Sending message: ', send_message)
+        s.send(send_message)
+        received_message = s.recv(rsp.BUFFER_SIZE)
+        print('Message received: ', received_message)
     s.close()
