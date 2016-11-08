@@ -16,8 +16,8 @@ if __name__ == '__main__':
         response_list = response_message.split(rsp.MSG_SEP)
         response_code = response_list[0]
         response_msg = response_list[1]
-        if response_code == __RESP_OK:
+        if response_code == rsp.__RESP_OK:
             continue
-        if response_code == __FILES:
+        if response_code == rsp.__FILES:
             print('Files you can edit: ', response_msg)
     s.close()
