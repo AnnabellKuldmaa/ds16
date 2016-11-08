@@ -1,0 +1,7 @@
+
+
+MSG_SEP = ';'
+BUFFER_SIZE = 1024
+
+__FILE_LIST = '01'
+__NEW_USER = '02'
