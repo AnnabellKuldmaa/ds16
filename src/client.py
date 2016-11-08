@@ -11,6 +11,13 @@ if __name__ == '__main__':
         send_message = raw_input()
         print('Sending message: ', send_message)
         s.send(send_message)
-        received_message = s.recv(rsp.BUFFER_SIZE)
-        print('Message received: ', received_message)
+        response_message = s.recv(rsp.BUFFER_SIZE)
+        print('Message received: ', response_message)
+        response_list = response_message.split(rsp.MSG_SEP)
+        response_code = response_list[0]
+        response_msg = response_list[1]
+        if response_code == __RESP_OK:
+            continue
+        if response_code == __FILES:
+            print('Files you can edit: ', response_msg)
     s.close()
