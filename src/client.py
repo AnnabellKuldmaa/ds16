@@ -20,12 +20,11 @@ class Client():
 
     
     def __login(self, user_name):
-        send_message = rsp.MSG_SEP.join([rsp.__GET_FILES] + [user_name])
+        send_message = rsp.MSG_SEP.join([rsp._GET_FILES] + [user_name])
         print('Sending message: ', send_message)
-        self.s.send(send_message)
-        response_message = self.s.recv(rsp.BUFFER_SIZE)
+        self.__s.send(send_message)
+        response_message = self.__s.recv(rsp.BUFFER_SIZE)
         print('Message received: ', response_message)
-
         return response_message
     
     def __session_rcv(self):
@@ -51,27 +50,31 @@ class Client():
     def __protocol_rcv(self,message):
         '''Processe received message:
         server notifications and request/responses separately'''
+        print("proto recv", message)
         message = message.split(rsp.MSG_SEP)
         req_code = message[0]
-    
+        msg_content = message[1:]
+        # self.__s.send('asdasd')
+        # if req_code == 
         print 'processing message'
-        return
+        # return
 
 
-    def ui_loop(self):
-        while True:
-            1+1
-            #listen to UI
+    # def ui_loop(self):
+    #     while True:
+    #         1+1
+    #         #listen to UI
     
     def network_loop(self):
         while True:
+            print('network loop')
             m = self.__session_rcv()
             if len(m) <= 0:
                 break
             self.__protocol_rcv(m)
     
-    def __close(self):
-        self.s.close()
+    # def __close(self):
+    #     self.s.close()
 
 if __name__ == '__main__':
     import sys
@@ -85,17 +88,17 @@ if __name__ == '__main__':
 
     srv_addr = ('127.0.0.1', 7777)
 
-    if client.connect(srv_addr):
+    client.connect(srv_addr, 'Markus')
         
-        #ui_thread = Thread(name='UIThread',target=client.ui_loop)
-        network_thread = Thread(name='Thread', target=client.network_loop)
-             
-        #ui_thread.start()
-        network_thread.start()
+    #ui_thread = Thread(name='UIThread',target=client.ui_loop)
+    network_thread = Thread(name='Thread', target=client.network_loop)
+         
+    #ui_thread.start()
+    network_thread.start()
 
-        #network_thread.join()
-        #ui_thread.join()
-        # TODO
+    network_thread.join()
+    #ui_thread.join()
+    # TODO
 
     print 'Terminating'
 

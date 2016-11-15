@@ -2,7 +2,7 @@ from socket import AF_INET, SOCK_STREAM, socket
 import select
 import datetime
 from collections import defaultdict
-
+import traceback
 import responses as rsp
 
 file_dict = {} # contains files and their contents
@@ -21,12 +21,16 @@ SOCKET_LIST = []
 
 def get_message(sock):
     message = ''
+    print('getmsg1')
     while True:
         chunk = sock.recv(rsp.BUFFER_SIZE)
+        print('recvd CHUNK', chunk)
         if not chunk:
             break
         else:
             message += chunk
+    print('getmsg2')
+    print('getmsg return:', message)
     return message
 
 
@@ -45,12 +49,17 @@ def handle_client(sock):
         sock.send(response)
 
 
+def create_message(code, msg):
+
+    return rsp.MSG_SEP.join([code] + msg)
+
+
 def broadcast_file_list(server_socket, sock):
     for client, socket in online_clients.items():
         # send the message only to peer
         if socket != server_socket and socket != sock :
             try:
-                socket.send(rsp.MSG_SEP.join([rsp.__FILE_LIST] + user_dict[client]))
+                socket.send(rsp.MSG_SEP.join([rsp._FILE_LIST] + user_dict[client]))
             except:
                 # broken socket connection
                 socket.close()
@@ -58,13 +67,13 @@ def broadcast_file_list(server_socket, sock):
                 if socket in SOCKET_LIST:
                     SOCKET_LIST.remove(socket)
 
-
+import json
 def request_user(user_name):
     if user_name in user_dict:  # return file list if username exists
-        response = rsp.MSG_SEP.join([rsp.__FILE_LIST] + user_dict[user_name])
+        response = rsp.MSG_SEP.join([rsp._FILE_LIST] + user_dict[user_name])
     else:  # else add user to dict
         user_dict[user_name] = []
-        response = rsp.__RESP_OK
+        response = rsp._RESP_OK
     return response
 
 
@@ -78,7 +87,7 @@ def edit_file(args):
     file_dict[args[0]] = args[1]
     # TODO:
     # - do broadcast somewhere
-    return rsp.MSG_SEP.join([rsp.__RESP_OK])
+    return rsp.MSG_SEP.join([rsp._RESP_OK])
 
 
 def create_file():
@@ -87,11 +96,11 @@ def create_file():
     else:
         max_nr = 0
     file_dict[str(max_nr)] = ''
-    return rsp.MSG_SEP.join([rsp.__FILE_NAME, str(max_nr)])
+    return rsp.MSG_SEP.join([rsp._FILE_NAME, str(max_nr)])
 
 
 def open_file(filename):
-    return rsp.MSG_SEP.join([rsp.__FILE_CONTENT, file_dict[filename]])
+    return rsp.MSG_SEP.join([rsp._FILE_CONTENT, file_dict[filename]])
 
 
 def edit_permission(args):
@@ -113,14 +122,14 @@ def edit_permission(args):
 
 
 
-command_dict = {rsp.__GET_FILES: request_user,
-                rsp.__EDIT_FILE: edit_file,
-                rsp.__CREATE_FILE: create_file,
-                #rsp.__UPDATE_FILE: broadcast,
-                rsp.__OPEN_FILE: open_file,
-                rsp.__EDIT_PERMISSION: edit_permission}
+command_dict = {rsp._GET_FILES: request_user,
+                rsp._EDIT_FILE: edit_file,
+                rsp._CREATE_FILE: create_file,
+                #rsp._UPDATE_FILE: broadcast,
+                rsp._OPEN_FILE: open_file,
+                rsp._EDIT_PERMISSION: edit_permission}
 
-
+import time
 if __name__ == '__main__':
     print 'Running'
     s = socket(AF_INET, SOCK_STREAM)
@@ -135,31 +144,43 @@ if __name__ == '__main__':
             ready_to_read, ready_to_write, in_error = select.select(SOCKET_LIST,[],[],0)
 
             for sock in ready_to_read:
+                # print('sock', sock)
                 # a new connection request recieved
                 if sock == s:
+                    # Login choice
                     sockfd, addr = s.accept()
                     SOCKET_LIST.append(sockfd)
-                    u_name = s.recv(rsp.BUFFER_SIZE)
-                    online_clients[u_name] = sockfd
-                    print "Client (%s, %s) connected" % addr
-
-                else:
-                    message = get_message(sock)
+                    message = sockfd.recv(rsp.BUFFER_SIZE)
                     message = message.split(rsp.MSG_SEP)
                     req_code = message[0]
+                    u_name = message[1]
+                    online_clients[u_name] = sockfd
+                    print(online_clients)
+                    print "Client (%s, %s) connected" % addr
 
-                    if len(message) > 1:
-                        action = command_dict[req_code]  # Get action from dict
-                        response = action(message[1:])
-                        if req_code == rsp.__CREATE_FILE:
-                            broadcast_file_list(s, sock)
-                    else:
-                        response = command_dict[message]
+                    message = rsp.MSG_SEP.join([rsp._FILE_LIST, json.dumps(list(user_dict[u_name]))])
+                    sockfd.send(message)
 
-                    sock.send(response)
+                else:
+                    # message = get_message(sock)
+                    message = sock.recv(rsp.BUFFER_SIZE)
+                    if message:
+                        print('SERVER RECEIVENG MSG:', message)
+                        message = message.split(rsp.MSG_SEP)
+                        req_code = message[0]
 
+                        if len(message) > 1:
+                            action = command_dict[req_code]  # Get action from dict
+                            response = action(message[1:])
+                            if req_code == rsp._CREATE_FILE:
+                                broadcast_file_list(s, sock)
+                        else:
+                            response = command_dict[message[0]]
+
+                        sock.send(response)
+                    sock.send('yolo')
                 #broadcast(server_socket, sockfd, "[%s:%s] entered our chatting room\n" % addr)
-
+            time.sleep(0.01)
             #client_socket, client_addr = s.accept()
             #SOCKET_LIST.append(client_socket)
             #handle_client(client_socket)
@@ -167,7 +188,10 @@ if __name__ == '__main__':
             #print 'Local end-point socket bound on: %s:%d' % client_socket.getsockname()
             # Wait for user input before terminating application
 
-    except KeyboardInterrupt:
+    except Exception, e:
+
         print 'Terminating ...'
+        print(e)
+        traceback.print_exc()
         s.close()
 
