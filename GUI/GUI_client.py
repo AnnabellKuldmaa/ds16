@@ -34,12 +34,15 @@ class Ui_MainWindow(object):
         self.user_edit = QtWidgets.QLineEdit(self.centralwidget)
         self.user_edit.setGeometry(QtCore.QRect(220, 10, 113, 20))
         self.user_edit.setObjectName("user_edit")
-        self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(500, 10, 75, 23))
-        self.pushButton.setObjectName("pushButton")
+        self.open_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.open_btn.setGeometry(QtCore.QRect(500, 10, 75, 23))
+        self.open_btn.setObjectName("open_btn")
         self.comboBox = QtWidgets.QComboBox(self.centralwidget)
         self.comboBox.setGeometry(QtCore.QRect(420, 10, 69, 22))
         self.comboBox.setObjectName("comboBox")
+        self.perm_edit = QtWidgets.QLineEdit(self.centralwidget)
+        self.perm_edit.setGeometry(QtCore.QRect(660, 10, 113, 20))
+        self.perm_edit.setObjectName("perm_edit")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -56,7 +59,7 @@ class Ui_MainWindow(object):
         self.perm_btn.setText(_translate("MainWindow", "Permissions"))
         self.IP_edit.setPlaceholderText(_translate("MainWindow", "IP address:port"))
         self.user_edit.setPlaceholderText(_translate("MainWindow", "Username"))
-        self.pushButton.setText(_translate("MainWindow", "Edit File"))
+        self.open_btn.setText(_translate("MainWindow", "Edit File"))
 
 
 if __name__ == "__main__":
