@@ -2,40 +2,38 @@ from socket import AF_INET, SOCK_STREAM, socket
 
 import responses as rsp
 import txteditor
+from threading import Thread
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Client():
     def __init__(self,io):
             #TODO IO is user interface
         self.__io = io
 
-    def connect(self,ip, port):
+    def connect(self,srv_addr):
         '''Connect to server, start game session'''
         self.__s = socket(AF_INET,SOCK_STREAM)
-        try:
-            self.__s.connect(srv_addr)
-            return True
-        except soc_err as e:
-            print soc_err
-        return False
+        self.__s.connect(srv_addr)
+
     
     def __login(self, user_name):
         send_message = rsp.MSG_SEP.join([rsp.__GET_FILES] + [user_name])
         print('Sending message: ', send_message)
         self.s.send(send_message)
-        print('Message received: ', response_message)
-        response_list = response_message.split(rsp.MSG_SEP)
-        response_code = response_list[0]
-        response_msg = response_list[1]
-        return response_code, files
+        #print('Message received: ', response_message)
+        #response_list = response_message.split(rsp.MSG_SEP)
+        #response_code = response_list[0]
+        #response_msg = response_list[1]
+        #return response_code, files
     
     def __session_rcv(self):
         '''Receive the block of data till next block separator'''
         m,b = '',''
         try:
-            b = self.__s.recv(BUFFER_SIZE)
+            b = self.__s.recv(rsp.BUFFER_SIZE)
             m += b
-            while len(b) > 0 and not (b.endswith(MSG_SEP)):
-                b = self.__s.recv(BUFFER_SIZE)
+            while len(b) > 0 and not (b.endswith(rsp.MSG_SEP)):
+                b = self.__s.recv(rsp.BUFFER_SIZE)
                 m += b
             if len(b) <= 0:
                 print 'Socket receive interrupted'  
@@ -45,15 +43,6 @@ class Client():
         except KeyboardInterrupt:
             self.s.close()
             print 'Ctrl+C issued, terminating ...' 
-            m = ''
-            
-        except soc_err as e:
-            if e.errno == 107:
-                print 'Server closed connection, terminating ...' 
-            else:
-                print 'Connection error: %s' % str(e) 
-            self.s.close()
-            print 'Disconnected'
             m = ''
         return m
 
@@ -80,7 +69,10 @@ class Client():
         self.s.close()
 
 if __name__ == '__main__':
-    io = GUI()
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    dialog = QtWidgets.QMainWindow()
+    io = txteditor.txteditor_GUI(dialog)
 
     client = Client(io)
     
@@ -96,8 +88,9 @@ if __name__ == '__main__':
         ui_thread.start()
         network_thread.start()
 
-        network_thread.join()
-        notifications_thread.join()
+        #network_thread.join()
+        #ui_thread.join()
+        # TODO
 
     print 'Terminating'
 
