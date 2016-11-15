@@ -1,30 +1,32 @@
 from socket import AF_INET, SOCK_STREAM, socket
-
+import sys
+sys.path.append('../GUI')
 import responses as rsp
-import txteditor
+#import txteditor
 from threading import Thread
-from PyQt5 import QtCore, QtGui, QtWidgets
+#from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Client():
     def __init__(self,io):
             #TODO IO is user interface
         self.__io = io
 
-    def connect(self,srv_addr):
+    def connect(self,srv_addr, user_name):
         '''Connect to server, start game session'''
         self.__s = socket(AF_INET,SOCK_STREAM)
         self.__s.connect(srv_addr)
+        response_message = self.__login(user_name)
+        self.__protocol_rcv(response_message)
 
     
     def __login(self, user_name):
         send_message = rsp.MSG_SEP.join([rsp.__GET_FILES] + [user_name])
         print('Sending message: ', send_message)
         self.s.send(send_message)
-        #print('Message received: ', response_message)
-        #response_list = response_message.split(rsp.MSG_SEP)
-        #response_code = response_list[0]
-        #response_msg = response_list[1]
-        #return response_code, files
+        response_message = self.s.recv(rsp.BUFFER_SIZE)
+        print('Message received: ', response_message)
+
+        return response_message
     
     def __session_rcv(self):
         '''Receive the block of data till next block separator'''
@@ -49,6 +51,9 @@ class Client():
     def __protocol_rcv(self,message):
         '''Processe received message:
         server notifications and request/responses separately'''
+        message = message.split(rsp.MSG_SEP)
+        req_code = message[0]
+    
         print 'processing message'
         return
 
@@ -70,22 +75,22 @@ class Client():
 
 if __name__ == '__main__':
     import sys
-    app = QtWidgets.QApplication(sys.argv)
-    dialog = QtWidgets.QMainWindow()
-    io = txteditor.txteditor_GUI(dialog)
+    #app = QtWidgets.QApplication(sys.argv)
+    #dialog = QtWidgets.QMainWindow()
+    #io = txteditor.txteditor_GUI(dialog)
 
-    client = Client(io)
+    client = Client(None)
     
     
 
-    srv_addr = ('127.0.0.1',7777)
+    srv_addr = ('127.0.0.1', 7777)
 
     if client.connect(srv_addr):
         
-        ui_thread = Thread(name='UIThread',target=client.ui_loop)
-        network_thread = Thread(name='Thread',target=client.network_loop)
+        #ui_thread = Thread(name='UIThread',target=client.ui_loop)
+        network_thread = Thread(name='Thread', target=client.network_loop)
              
-        ui_thread.start()
+        #ui_thread.start()
         network_thread.start()
 
         #network_thread.join()
