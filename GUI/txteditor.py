@@ -1,4 +1,5 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from Py
 from GUI_client import Ui_MainWindow
 
 class txteditor_GUI(Ui_MainWindow):
