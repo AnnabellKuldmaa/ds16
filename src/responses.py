@@ -3,7 +3,9 @@
 MSG_SEP = ';'
 BUFFER_SIZE = 1024
 
-__RESP_OK = '00'
-__GET_FILES = '01'
-__FILE_LIST = '02'
-__EDIT_FILE = '03'
+__RSP_OK = '00'
+__FILE_LIST = '01'
+__NEW_FILE = '02'
+__CHANGE_PERM = '03'
+__GET_FILES = '04'
+__DUPLICATE = '05'
