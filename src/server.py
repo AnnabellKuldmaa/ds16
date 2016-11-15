@@ -1,28 +1,46 @@
 from socket import AF_INET, SOCK_STREAM, socket
 from threading import Thread, Lock
+import select
+import datetime
+from collections import defaultdict
 
 import responses as rsp
 
-
 file_dict = {}
 user_dict = {}
+online_clients = set()
+
+"""
+lock_dict[filename] = {lock: timestamp,
+                        owner: username}
+"""
+lock_dict = defaultdict(dict)
+
+
+def get_message(sock):
+    message = ''
+    while True:
+        chunk = sock.recv(rsp.BUFFER_SIZE)
+        if not chunk:
+            break
+        else:
+            message += chunk
+    return message
 
 
 def handle_client(sock):
-    user_name = sock.recv(rsp.BUFFER_SIZE)
-    print(user_name)
-    if user_name:
-        if user_name in user_dict:  # return file list if username exists
-            response = rsp.MSG_SEP.join([rsp.__FILE_LIST] + user_dict[user_name])
-        else:  # else add user to dict
-            user_dict[user_name] = []
-            response = rsp.__NEW_USER
-        sock.send(response)
-    else:  # return if empty string sent
-        return
-
     while True:
-        message = sock.recv(rsp.BUFFER_SIZE)
+        message = get_message(sock)
+        message = message.split(rsp.MSG_SEP)
+        req_code = message[0]
+
+        if len(message) > 1:
+            action = command_dict[req_code]  # Get action from dict
+            response = action(message[1:])
+        else:
+            response = command_dict[message]
+
+        sock.send(response)
 
 
 if __name__ == '__main__':
@@ -45,3 +63,38 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print 'Terminating ...'
         s.close()
+
+
+def request_user(user_name):
+    if user_name in user_dict:  # return file list if username exists
+        response = rsp.MSG_SEP.join([rsp.__FILES] + user_dict[user_name])
+    else:  # else add user to dict
+        user_dict[user_name] = []
+        response = rsp.__RESP_OK
+    return response
+
+
+def get_file(names):
+    """
+    first name must be file name, second user name
+    """
+    if datetime.datetime.now() - lock_dict[names[0]]['lock'] < 1000 and lock_dict[names[0]]['owner'] != names[1]:
+        return rsp.MSG_SEP.join([rsp.__FILE_LOCKED, ''])
+    file_content = file_dict[names[0]]
+    lock_dict[names[0]]['lock'] = datetime.datetime.now()
+    lock_dict[names[0]]['owner'] = names[1]
+    return rsp.MSG_SEP.join([rsp.__FILE_CONTENT, file_content]) # Add __FILE_CONTENT to responses
+
+
+def create_file():
+    if file_dict.keys():
+        max_nr = max(file_dict.keys())
+    else:
+        max_nr = 0
+    file_dict[max_nr] = ''
+    return rsp.MSG_SEP.join([rsp.__FILE_CONTENT, max_nr])
+
+
+
+command_dict = {rsp.__GET_FILES: request_user,
+                rsp.__EDIT_FILE: get_file}
