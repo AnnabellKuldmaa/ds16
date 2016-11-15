@@ -1,13 +1,12 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from GUI_client import Ui_MainWindow
-import subprocess
 
 class txteditor_GUI(Ui_MainWindow):
     def __init__(self, dialog):
         Ui_MainWindow.__init__(self)
         self.setupUi(dialog)
 
-        #tie GUI events to actions defined in methods
+        # tie GUI events to actions defined in methods
         self.main_text_edit.textChanged.connect(self.read_text)
         self.connect_btn.clicked.connect(self.connect_server)
         self.newfile_btn.clicked.connect(self.new_file)
@@ -17,7 +16,9 @@ class txteditor_GUI(Ui_MainWindow):
 
     def connect_server(self):
         print "connecting"
-        # open client.py using subprocess
+        socket_info = self.IP_edit.text()
+        username = self.user_edit.text()
+        # send command to client with username and socket address:port as arguments
         return
 
     def new_file(self):
@@ -36,7 +37,7 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
     def list_files(self):
-        #listen to message about new files from client
+        # listen to message about new files from client
         return
 
     def read_text(self):
@@ -44,11 +45,9 @@ class txteditor_GUI(Ui_MainWindow):
         return txt
 
     def write_text(self):
-        #txt = (write input here)
-        #self.main_text_edit.setPlainText(txt)
-
-
-
+        # txt = (write input here)
+        # self.main_text_edit.setPlainText(txt)
+        return
 
 if __name__ == "__main__":
     import sys
