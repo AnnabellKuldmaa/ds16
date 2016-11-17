@@ -1,10 +1,10 @@
 from socket import AF_INET, SOCK_STREAM, socket
 import sys
-sys.path.append('../GUI')
+sys.path.append('/home/markus/git/ds16/GUI')
 import responses as rsp
-#import txteditor
+import txteditor
 from threading import Thread
-#from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 
 class Client():
     def __init__(self,io):
@@ -60,10 +60,10 @@ class Client():
         # return
 
 
-    # def ui_loop(self):
-    #     while True:
-    #         1+1
-    #         #listen to UI
+    def ui_loop(self):
+         while True:
+             1+1
+             #listen to UI
     
     def network_loop(self):
         while True:
@@ -73,14 +73,14 @@ class Client():
                 break
             self.__protocol_rcv(m)
     
-    # def __close(self):
-    #     self.s.close()
+    def __close(self):
+         self.s.close()
 
 if __name__ == '__main__':
     import sys
-    #app = QtWidgets.QApplication(sys.argv)
-    #dialog = QtWidgets.QMainWindow()
-    #io = txteditor.txteditor_GUI(dialog)
+    app = QtWidgets.QApplication(sys.argv)
+    dialog = QtWidgets.QMainWindow()
+    io = txteditor.txteditor_GUI(dialog)
 
     client = Client(None)
     
@@ -90,14 +90,14 @@ if __name__ == '__main__':
 
     client.connect(srv_addr, 'Markus')
         
-    #ui_thread = Thread(name='UIThread',target=client.ui_loop)
+    ui_thread = Thread(name='UIThread',target=client.ui_loop)
     network_thread = Thread(name='Thread', target=client.network_loop)
          
-    #ui_thread.start()
+    ui_thread.start()
     network_thread.start()
 
     network_thread.join()
-    #ui_thread.join()
+    ui_thread.join()
     # TODO
 
     print 'Terminating'
