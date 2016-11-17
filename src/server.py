@@ -51,15 +51,17 @@ def handle_client(sock):
 
 def create_message(code, msg):
 
-    return rsp.MSG_SEP.join([code] + msg)
+    return rsp.make_response([code] + msg)
 
 
 def broadcast_file_list(server_socket, sock):
+    print('Broadcasting')
     for client, socket in online_clients.items():
+        print(client)
         # send the message only to peer
-        if socket != server_socket and socket != sock :
+        if socket != server_socket:
             try:
-                socket.send(rsp.MSG_SEP.join([rsp._FILE_LIST] + user_dict[client]))
+                socket.send(rsp.make_response([rsp._FILE_LIST] + user_dict[client]))
             except:
                 # broken socket connection
                 socket.close()
@@ -67,10 +69,9 @@ def broadcast_file_list(server_socket, sock):
                 if socket in SOCKET_LIST:
                     SOCKET_LIST.remove(socket)
 
-import json
 def request_user(user_name):
     if user_name in user_dict:  # return file list if username exists
-        response = rsp.MSG_SEP.join([rsp._FILE_LIST] + user_dict[user_name])
+        response = rsp.make_response([rsp._FILE_LIST] + user_dict[user_name])
     else:  # else add user to dict
         user_dict[user_name] = []
         response = rsp._RESP_OK
@@ -87,20 +88,22 @@ def edit_file(args):
     file_dict[args[0]] = args[1]
     # TODO:
     # - do broadcast somewhere
-    return rsp.MSG_SEP.join([rsp._RESP_OK])
+    return rsp.make_response([rsp._RESP_OK])
 
 
-def create_file():
+def create_file(user_name):
     if file_dict.keys():
-        max_nr = max(file_dict.keys())+1
+        max_nr = max(map(int, file_dict.keys())) + 1
     else:
         max_nr = 0
     file_dict[str(max_nr)] = ''
-    return rsp.MSG_SEP.join([rsp._FILE_NAME, str(max_nr)])
+    user_dict[str(max_nr)].add(user_name)
+    print('File created, ', str(max_nr))
+    return rsp.make_response([rsp._FILE_NAME, str(max_nr)])
 
 
 def open_file(filename):
-    return rsp.MSG_SEP.join([rsp._FILE_CONTENT, file_dict[filename]])
+    return rsp.make_response([rsp._FILE_CONTENT, file_dict[filename]])
 
 
 def edit_permission(args):
@@ -158,7 +161,7 @@ if __name__ == '__main__':
                     print(online_clients)
                     print "Client (%s, %s) connected" % addr
 
-                    message = rsp.MSG_SEP.join([rsp._FILE_LIST, json.dumps(list(user_dict[u_name]))])
+                    message = rsp.make_response([rsp._FILE_LIST] + list(user_dict[u_name]))
                     sockfd.send(message)
 
                 else:
@@ -169,16 +172,16 @@ if __name__ == '__main__':
                         message = message.split(rsp.MSG_SEP)
                         req_code = message[0]
 
-                        if len(message) > 1:
-                            action = command_dict[req_code]  # Get action from dict
-                            response = action(message[1:])
-                            if req_code == rsp._CREATE_FILE:
-                                broadcast_file_list(s, sock)
+                        if req_code == rsp._CREATE_FILE:
+                            u_name = [user for user, socket in online_clients.items() if socket == sock]
+                            response = create_file(u_name[0])
+                        elif req_code == rsp._OPEN_FILE:
+                            response = open_file(message[1])
                         else:
-                            response = command_dict[message[0]]
+                            continue
 
                         sock.send(response)
-                    sock.send('yolo')
+                    #sock.send('yolo')
                 #broadcast(server_socket, sockfd, "[%s:%s] entered our chatting room\n" % addr)
             time.sleep(0.01)
             #client_socket, client_addr = s.accept()
