@@ -9,6 +9,7 @@ file_dict = {} # contains files and their contents
 
 user_dict = defaultdict(set) # contains users and their files
 online_clients = {} #clients -> sockets
+open_files = defaultdict(list) # filename: [user_sock1, ..]
 
 
 """
@@ -71,14 +72,19 @@ def broadcast_file_list(server_socket, sock):
 
 def broadcast_text(server_socket, sock, filename):
     print('Broadcasting')
-    for client, socket in online_clients.items():
-        print(client)
+    print(filename)
+    print(open_files[filename])
+    for socket in open_files[filename]:
+        print(open_files)
         # send the message only to peer
-        if socket != server_socket:
+        if socket != server_socket and socket != sock:
             try:
-                socket.send(rsp.make_response([rsp._FILE_LIST] + user_dict[client]))
+                print('socket send, data>', [rsp._UPDATE_FILE, file_dict[filename]])
+                socket.send(rsp.make_response([rsp._UPDATE_FILE, file_dict[filename]]))
             except:
+                print('socket send error broadacst text')
                 # broken socket connection
+                traceback.print_exc()                
                 socket.close()
                 # broken socket, remove it
                 if socket in SOCKET_LIST:
@@ -118,7 +124,19 @@ def create_file(user_name):
     return rsp.make_response([rsp._FILE_NAME, str(max_nr)])
 
 
-def open_file(filename):
+def open_file(filename, sock):
+    print('open_file, sock', sock, 'filename', filename)
+    for file in open_files:
+        print(file)
+        if file != filename:
+            try:
+                print('open_files[file].remove(sock), sock:', sock)
+                open_files[file].remove(sock)
+            except Exception, e:
+                pass
+
+    open_files[filename] += [sock]
+    print('open_files', open_files)
     return rsp.make_response([rsp._FILE_CONTENT, file_dict[filename]])
 
 
@@ -194,10 +212,10 @@ if __name__ == '__main__':
                             u_name = [user for user, socket in online_clients.items() if socket == sock]
                             response = create_file(u_name[0])
                         elif req_code == rsp._OPEN_FILE:
-                            response = open_file(message[1])
+                            response = open_file(message[0], sock)
                         elif req_code == rsp._UPDATE_FILE:
                             file_dict[message[0]] = message[1]
-
+                            broadcast_text(s, sock, message[0])
                             response = rsp.make_response([rsp._RESP_OK])
                         else:
                             continue
