@@ -12,6 +12,7 @@ class txteditor_GUI(Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(dialog)
         self.queue = queue
+        self.current_file = '0'
 
         # tie GUI events to actions defined in methods
         self.main_text_edit.textChanged.connect(self.read_text)
@@ -49,16 +50,16 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
     def add_file_cbox(self, item):
-        self.comboBox.addItems(['1', '2', '0'])
+        self.comboBox.addItem(item)
         self.comboBox.update()
-        print(self.comboBox)
         print('Added item to cbox')
         print(item)
         return
 
     def read_text(self):
         txt = self.main_text_edit.toPlainText()
-        return txt
+        self.queue.put(rsp.make_response([rsp._UPDATE_FILE, self.current_file, txt]))
+        return
 
     def write_text(self):
         # txt = (write input here)

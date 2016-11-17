@@ -44,11 +44,6 @@ class Client():
                 print('received', b)
                 b = self._s.recv(rsp.BUFFER_SIZE)
                 m += b
-            #if len(b) <= 0:
-            #    print 'Socket receive interrupted'
-            #    self._s.close()
-            #    m = ''
-            #m = m[:-1]
         except Exception:
             traceback.print_exc()
             self._s.close()
@@ -62,9 +57,10 @@ class Client():
         print("proto recv", message)
         message = message.split(rsp.MSG_SEP)
         req_code = message[0]
-        msg_content = message[1:]
+        msg_content = message[1:].remove(rsp.SPACE_INVADER)
         if req_code == rsp._FILE_NAME:
-            self._io.add_file_cbox(message[1])
+            self._io.add_file_cbox(msg_content) #Won't send created file
+
         # self._s.send('asdasd')
         # if req_code == 
         print 'processing message'
@@ -119,7 +115,7 @@ class listen_ui(QThread):
                 #print(e)
                 pass
 
-            time.sleep(0.3)
+            #time.sleep(0.3)
 
 
 if __name__ == '__main__':

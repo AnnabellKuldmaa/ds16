@@ -69,6 +69,22 @@ def broadcast_file_list(server_socket, sock):
                 if socket in SOCKET_LIST:
                     SOCKET_LIST.remove(socket)
 
+def broadcast_text(server_socket, sock, filename):
+    print('Broadcasting')
+    for client, socket in online_clients.items():
+        print(client)
+        # send the message only to peer
+        if socket != server_socket:
+            try:
+                socket.send(rsp.make_response([rsp._FILE_LIST] + user_dict[client]))
+            except:
+                # broken socket connection
+                socket.close()
+                # broken socket, remove it
+                if socket in SOCKET_LIST:
+                    SOCKET_LIST.remove(socket)
+
+
 def request_user(user_name):
     if user_name in user_dict:  # return file list if username exists
         response = rsp.make_response([rsp._FILE_LIST] + user_dict[user_name])
@@ -171,14 +187,21 @@ if __name__ == '__main__':
                         print('SERVER RECEIVENG MSG:', message)
                         message = message.split(rsp.MSG_SEP)
                         req_code = message[0]
+                        message = message[1:]
+
 
                         if req_code == rsp._CREATE_FILE:
                             u_name = [user for user, socket in online_clients.items() if socket == sock]
                             response = create_file(u_name[0])
                         elif req_code == rsp._OPEN_FILE:
                             response = open_file(message[1])
+                        elif req_code == rsp._UPDATE_FILE:
+                            file_dict[message[0]] = message[1]
+
+                            response = rsp.make_response([rsp._RESP_OK])
                         else:
                             continue
+                        print(file_dict)
 
                         sock.send(response)
                     #sock.send('yolo')
