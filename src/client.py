@@ -2,10 +2,13 @@ from socket import AF_INET, SOCK_STREAM, socket
 import sys
 import os
 WORK_DIR = os.getcwd()
+#print(WORK_DIR)
 sys.path.append(os.path.join(WORK_DIR, 'GUI'))
+#sys.path.append('../GUI')
 import responses as rsp
 import txteditor
 from threading import Thread
+#from multiprocessing import Queue
 from Queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QThread
@@ -49,7 +52,7 @@ class Client():
         except Exception:
             traceback.print_exc()
             self._s.close()
-            print 'Ctrl+C issued, terminating ...' 
+            print ('Ctrl+C issued, terminating ...')
             m = ''
         return m
 
@@ -76,7 +79,7 @@ class Client():
 
         # self._s.send('asdasd')
         # if req_code == 
-        print 'processing message'
+        print ('processing message')
         # return
 
 
@@ -124,7 +127,7 @@ class listen_ui(QThread):
                 command = self.queue.get(block=False)
                 self.handle_command(command)
                 print('Command received %s' % command)
-            except Exception, e:
+            except Exception as e:
                 #print(e)
                 pass
 
@@ -153,6 +156,6 @@ if __name__ == '__main__':
     # TODO
     sys.exit(app.exec_())
 
-    print 'Terminating'
+    print ('Terminating')
 
     
