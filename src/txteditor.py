@@ -1,26 +1,30 @@
-import sys
-from PyQt5 import QtWidgets, QtCore
-from GUI_client import Ui_MainWindow
-#from Queue import Queue
 from multiprocessing import Queue
-import responses as rsp
-from client import Client
 from socket import socket, AF_INET, SOCK_STREAM
-import traceback
+import sys
 import time
+import traceback
 
+from PyQt5 import QtWidgets, QtCore
+
+from GUI_client import Ui_MainWindow
+from client import Client
+import responses as rsp
+
+
+#from Queue import Queue
 class txteditor_GUI(Ui_MainWindow):
     def __init__(self, dialog):
         Ui_MainWindow.__init__(self)
         self.setupUi(dialog)
-        self.current_file = '0'
+        self.current_file = None#TODO
         self.is_locked = False
 
         # tie GUI events to actions defined in methods
         self.main_text_edit.textChanged.connect(self.read_text)
         self.connect_btn.clicked.connect(self.connect_server)
         self.newfile_btn.clicked.connect(self.create_file)
-        self.perm_btn.clicked.connect(self.set_permissions)
+        self.set_perm_btn.clicked.connect(self.set_permissions)
+        self.get_perm_btn.clicked.connect(self.get_permissions)
         self.open_btn.clicked.connect(self.edit_file)
 
         self.queue = Queue()
@@ -31,6 +35,7 @@ class txteditor_GUI(Ui_MainWindow):
         self.network_thread.new_filename.connect(self.add_file_cbox)
         self.network_thread.new_text.connect(self.write_text)
         self.network_thread.new_filelist.connect(self.list_files)
+        self.network_thread.new_perm.connect(self.set_perm_text)
 
     def connect_server(self):
         print ("connecting")
@@ -42,11 +47,18 @@ class txteditor_GUI(Ui_MainWindow):
             response_message = self.__login(username)
             self.network_thread.connect(self._s)
             self.network_thread.start()
+            
             self.connect_btn.setEnabled(False)
+            self.IP_edit.setEnabled(False)
+            self.user_edit.setEnabled(False)
+            self.comboBox.setEnabled(True)
+            self.newfile_btn.setEnabled(True)
+            self.open_btn.setEnabled(True)
+            self.get_perm_btn.setEnabled(True)
 
             self.network_thread._protocol_rcv(response_message)
-        except socket.error as e:
-            print ("Socket error ({0}): {1}".format(e.errno, e.strerror))
+        except Exception as e:
+            print traceback.print_exc()
         return
 
     def __login(self, user_name):
@@ -65,13 +77,48 @@ class txteditor_GUI(Ui_MainWindow):
     def edit_file(self):
         print ("edit file")
         # open selected file for editing
+        self.current_file = str(self.comboBox.currentText())
         self._s.send(rsp.MSG_SEP.join([rsp._OPEN_FILE, self.current_file]))
         self.main_text_edit.setEnabled(True)
         return
 
     def set_permissions(self):
-        # give edit permissions to users
-        print ("set permissions")
+        try:
+            txt = self.perm_edit.text()
+            
+            self.perm_edit.clear()
+            self.perm_edit.setEnabled(False)
+            self.comboBox.setEnabled(True)
+            self.newfile_btn.setEnabled(True)
+            self.open_btn.setEnabled(True)
+            self.get_perm_btn.setEnabled(True)
+            self.set_perm_btn.setEnabled(False)
+        
+            print ("Set permissions", txt)
+            self._s.send(rsp.MSG_SEP.join([rsp._SET_PERM,str(self.comboBox.currentText()),txt]))
+        except Exception as e:
+            traceback.print_exc()
+        return
+    
+    def set_perm_text(self, txt):
+        try:
+            print('Ui perm received', txt)
+            self.perm_edit.setEnabled(True)
+            self.set_perm_btn.setEnabled(True)
+            self.perm_edit.setText(txt)
+        except Exception as e:
+            traceback.print_exc()
+        return
+        
+    
+    def get_permissions(self):
+        # get permission list, all other functionality disabled
+        self.comboBox.setEnabled(False)
+        self.newfile_btn.setEnabled(False)
+        self.open_btn.setEnabled(False)
+        self.get_perm_btn.setEnabled(False)
+        self._s.send(rsp.MSG_SEP.join([rsp._GET_PERM,str(self.comboBox.currentText())]))
+        print ("get permissions")
         return
 
     def list_files(self, items):

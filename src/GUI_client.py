@@ -32,11 +32,19 @@ class Ui_MainWindow(object):
         self.newfile_btn = QtWidgets.QPushButton(self.centralwidget)
         self.newfile_btn.setGeometry(QtCore.QRect(340, 10, 75, 23))
         self.newfile_btn.setObjectName("newfile_btn")
+        self.newfile_btn.setEnabled(False)
 
         # Permission button
-        self.perm_btn = QtWidgets.QPushButton(self.centralwidget)
-        self.perm_btn.setGeometry(QtCore.QRect(580, 10, 75, 23))
-        self.perm_btn.setObjectName("perm_btn")
+        self.get_perm_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.get_perm_btn.setGeometry(QtCore.QRect(580, 10, 30, 23))
+        self.get_perm_btn.setObjectName("get_perm_btn")
+        self.get_perm_btn.setEnabled(False)
+        
+        # Permission button 3
+        self.set_perm_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.set_perm_btn.setGeometry(QtCore.QRect(630, 10, 30, 23))
+        self.set_perm_btn.setObjectName("set_perm_btn")
+        self.set_perm_btn.setEnabled(False)
 
         # IP address textbox
         self.IP_edit = QtWidgets.QLineEdit(self.centralwidget)
@@ -44,26 +52,31 @@ class Ui_MainWindow(object):
         self.IP_edit.setInputMask("")
         self.IP_edit.setText("127.0.0.1")
         self.IP_edit.setObjectName("IP_edit")
+        self.IP_edit.setEnabled(True)
 
         # Edit file button
         self.user_edit = QtWidgets.QLineEdit(self.centralwidget)
         self.user_edit.setGeometry(QtCore.QRect(220, 10, 113, 20))
         self.user_edit.setObjectName("user_edit")
+        self.user_edit.setEnabled(True)
 
         # Open file button
         self.open_btn = QtWidgets.QPushButton(self.centralwidget)
         self.open_btn.setGeometry(QtCore.QRect(500, 10, 75, 23))
         self.open_btn.setObjectName("open_btn")
+        self.open_btn.setEnabled(False)
 
         #Combo box
         self.comboBox = QtWidgets.QComboBox(self.centralwidget)
         self.comboBox.setGeometry(QtCore.QRect(420, 10, 69, 22))
         self.comboBox.setObjectName("comboBox")
+        self.comboBox.setEnabled(False)
 
         # Permission text box
         self.perm_edit = QtWidgets.QLineEdit(self.centralwidget)
         self.perm_edit.setGeometry(QtCore.QRect(660, 10, 113, 20))
         self.perm_edit.setObjectName("perm_edit")
+        self.perm_edit.setEnabled(False)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -78,7 +91,8 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.connect_btn.setText(_translate("MainWindow", "Connect"))
         self.newfile_btn.setText(_translate("MainWindow", "New File"))
-        self.perm_btn.setText(_translate("MainWindow", "Permissions"))
+        self.get_perm_btn.setText(_translate("MainWindow", "Get"))
+        self.set_perm_btn.setText(_translate("MainWindow", "Set"))
         self.IP_edit.setPlaceholderText(_translate("MainWindow", "IP address:port"))
         self.user_edit.setPlaceholderText(_translate("MainWindow", "Username"))
         self.open_btn.setText(_translate("MainWindow", "Edit File"))

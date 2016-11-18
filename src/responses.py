@@ -11,10 +11,12 @@ _EDIT_FILE = '03'
 _CREATE_FILE = '04'
 _UPDATE_FILE = '05' #
 _OPEN_FILE = '06'
-_EDIT_PERMISSION = '07'
+_GET_PERM = '07'
 _CONNECT = '08'
 _FILE_NAME = '09'
 _FILE_CONTENT = '10'
+_PERM_LIST = '11'
+_SET_PERM = '12'
 
 def make_response(args):
     return MSG_SEP.join(args + [SPACE_INVADER])

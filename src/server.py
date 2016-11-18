@@ -58,7 +58,7 @@ def broadcast_file_list(server_socket, sock):
         # send the message only to peer
         if socket != server_socket:
             try:
-                socket.send(rsp.make_response([rsp._FILE_LIST] + user_dict[client]))
+                socket.send(rsp.make_response([rsp._FILE_LIST] + list(user_dict[client])))
             except:
                 # broken socket connection
                 socket.close()
@@ -128,6 +128,14 @@ def open_file(filename, sock):
     print('open_files', open_files)
     return rsp.make_response([rsp._FILE_CONTENT, file_dict[filename]])
 
+def get_perm(filename):
+    user_list = []
+    for u_name in user_dict.keys():
+        if filename in user_dict[u_name]:
+            user_list.append(u_name)
+    print('User list', user_list)
+    return rsp.make_response([rsp._PERM_LIST] + user_list)
+    
 
 def edit_permission(args):
     """
@@ -137,6 +145,9 @@ def edit_permission(args):
     """
     filename = args[0]
     userlist = args[1:]
+    print ('Editing permissions for file', filename)
+    print ('New user list', userlist)
+    #TODO: tundmatuid peab ka saama lisad? user ei pruugi selle hetkel olemas olla
     for u_name in user_dict.keys():
         if u_name in userlist:
             user_dict[u_name].add(filename)
@@ -145,17 +156,17 @@ def edit_permission(args):
                 user_dict[u_name].remove(filename)
             except KeyError:
                 continue
+    print (user_dict)
 
 def request_user():
     return
 
-
-command_dict = {rsp._GET_FILES: request_user,
-                rsp._EDIT_FILE: edit_file,
-                rsp._CREATE_FILE: create_file,
-                #rsp._UPDATE_FILE: broadcast,
-                rsp._OPEN_FILE: open_file,
-                rsp._EDIT_PERMISSION: edit_permission}
+#command_dict = {rsp._GET_FILES: request_user,
+#                rsp._EDIT_FILE: edit_file,
+#                rsp._CREATE_FILE: create_file,
+#                #rsp._UPDATE_FILE: broadcast,
+#                rsp._OPEN_FILE: open_file,
+#                rsp._EDIT_PERMISSION: edit_permission}
 
 import time
 if __name__ == '__main__':
@@ -217,6 +228,13 @@ if __name__ == '__main__':
                             file_dict[message[0]] = message[1]
                             broadcast_text(s, sock, message[0])
                             response = rsp.make_response([rsp._RESP_OK])
+                        elif req_code == rsp._GET_PERM:
+                            response = get_perm(message[0])
+                        elif req_code == rsp._SET_PERM:
+                            edit_permission(message)
+                            broadcast_file_list(s, sock)
+                            response = rsp.make_response([rsp._RESP_OK])
+                            #TODO brodcast new file list
                         else:
                             continue
                         print(file_dict)

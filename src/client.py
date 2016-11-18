@@ -11,6 +11,8 @@ class Client(QThread):
     new_filename = pyqtSignal(list)
     new_filelist = pyqtSignal(list)
     new_text = pyqtSignal(str)
+    new_perm = pyqtSignal(str)
+
 
     def __init__(self):
             #TODO IO is user interface
@@ -29,7 +31,7 @@ class Client(QThread):
             b = self._s.recv(rsp.BUFFER_SIZE)
             m += b
             while len(b) == rsp.BUFFER_SIZE and not b.endswith(rsp.SPACE_INVADER):
-                print('received', b)
+                print('Received', b)
                 b = self._s.recv(rsp.BUFFER_SIZE)
                 m += b
         except Exception:
@@ -55,14 +57,15 @@ class Client(QThread):
         print(msg_content)
         if req_code == rsp._FILE_NAME:
             self.new_filename.emit(msg_content)
-        if req_code == rsp._UPDATE_FILE:#,rsp._FILE_CONTENT]:
+        elif req_code in [rsp._UPDATE_FILE, rsp._FILE_CONTENT]:
             print('client received', msg_content)
             # TODO> SEE TEXTBOX OLEMA DISABLED
             self.new_text.emit(msg_content[0])
-        if req_code == rsp._FILE_LIST:
+        elif req_code == rsp._FILE_LIST:
             self.new_filelist.emit(msg_content)
-        if req_code == rsp._FILE_CONTENT:
-            self.new_text.emit(msg_content[0])
+        elif req_code == rsp._PERM_LIST:
+            self.new_perm.emit(msg_content[0])
+
 
         print ('processing message')
         # return
