@@ -21,16 +21,12 @@ SOCKET_LIST = []
 
 def get_message(sock):
     message = ''
-    print('getmsg1')
-    while True:
+    chunk = sock.recv(rsp.BUFFER_SIZE)
+    message += chunk
+    while len(chunk) > 0 and not chunk.endswith(rsp.SPACE_INVADER):
         chunk = sock.recv(rsp.BUFFER_SIZE)
         print('recvd CHUNK', chunk)
-        if not chunk:
-            break
-        else:
-            message += chunk
-    print('getmsg2')
-    print('getmsg return:', message)
+        message += chunk
     return message
 
 
@@ -69,6 +65,7 @@ def broadcast_file_list(server_socket, sock):
                 if socket in SOCKET_LIST:
                     SOCKET_LIST.remove(socket)
 
+
 def broadcast_text(server_socket, sock, filename):
     print('Broadcasting')
     for client, socket in online_clients.items():
@@ -83,6 +80,7 @@ def broadcast_text(server_socket, sock, filename):
                 # broken socket, remove it
                 if socket in SOCKET_LIST:
                     SOCKET_LIST.remove(socket)
+                #del online_clients[socket]
 
 
 def request_user(user_name):
