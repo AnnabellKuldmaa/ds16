@@ -121,7 +121,7 @@ def open_file(filename, sock):
             try:
                 print('open_files[file].remove(sock), sock:', sock)
                 open_files[file].remove(sock)
-            except Exception, e:
+            except Exception as e:
                 pass
 
     open_files[filename] += [sock]
@@ -146,6 +146,8 @@ def edit_permission(args):
             except KeyError:
                 continue
 
+def request_user():
+    return
 
 
 command_dict = {rsp._GET_FILES: request_user,
@@ -157,13 +159,13 @@ command_dict = {rsp._GET_FILES: request_user,
 
 import time
 if __name__ == '__main__':
-    print 'Running'
+    print ('Running')
     s = socket(AF_INET, SOCK_STREAM)
     SOCKET_LIST.append(s)
     s.bind(('127.0.0.1', 7777))
     s.listen(1)
-    print "Socket is bound to %s:%d" % s.getsockname()
-    print 'Socket %s:%d is in listening state' % s.getsockname()
+    print ("Socket is bound to %s:%d" % s.getsockname())
+    print ('Socket %s:%d is in listening state' % s.getsockname())
     threads = []
     try:
         while 1:
@@ -175,6 +177,7 @@ if __name__ == '__main__':
                 if sock == s:
                     # Login choice
                     sockfd, addr = s.accept()
+                    print ('Tulen!')
                     SOCKET_LIST.append(sockfd)
                     message = sockfd.recv(rsp.BUFFER_SIZE)
                     message = message.split(rsp.MSG_SEP)
@@ -182,15 +185,23 @@ if __name__ == '__main__':
                     u_name = message[1]
                     online_clients[u_name] = sockfd
                     print(online_clients)
-                    print "Client (%s, %s) connected" % addr
+                    print ("Client (%s, %s) connected" % addr)
                     print(user_dict)
                     message = rsp.make_response([rsp._FILE_LIST] + list(user_dict[u_name]))
                     sockfd.send(message)
 
                 else:
                     # message = get_message(sock)
+                    #Is message coming from that socket
                     message = sock.recv(rsp.BUFFER_SIZE)
+                    final_message = message
                     if message:
+                        #is message ended
+                        while len(message) == rsp.BUFFER_SIZE and not message.endswith(rsp.SPACE_INVADER):
+                            message = sock.recv(rsp.BUFFER_SIZE)
+                            final_message += message
+                            
+                        message = final_message
                         print('SERVER RECEIVENG MSG:', message)
                         message = message.split(rsp.MSG_SEP)
                         req_code = message[0]
@@ -221,9 +232,9 @@ if __name__ == '__main__':
             #print 'Local end-point socket bound on: %s:%d' % client_socket.getsockname()
             # Wait for user input before terminating application
 
-    except Exception, e:
+    except Exception as e:
 
-        print 'Terminating ...'
+        print ('Terminating ...')
         print(e)
         traceback.print_exc()
         s.close()

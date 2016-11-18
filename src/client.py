@@ -35,7 +35,7 @@ class Client(QThread):
         except Exception:
             traceback.print_exc()
             self._s.close()
-            print 'Ctrl+C issued, terminating ...' 
+            print ('Ctrl+C issued, terminating ...' )
             m = ''
         return m
 
@@ -55,14 +55,16 @@ class Client(QThread):
         print(msg_content)
         if req_code == rsp._FILE_NAME:
             self.new_filename.emit(msg_content)
-        if req_code == rsp._UPDATE_FILE:
+        if req_code == rsp._UPDATE_FILE:#,rsp._FILE_CONTENT]:
             print('client received', msg_content)
             # TODO> SEE TEXTBOX OLEMA DISABLED
             self.new_text.emit(msg_content[0])
         if req_code == rsp._FILE_LIST:
             self.new_filelist.emit(msg_content)
+        if req_code == rsp._FILE_CONTENT:
+            self.new_text.emit(msg_content[0])
 
-        print 'processing message'
+        print ('processing message')
         # return
     
     def network_loop(self):

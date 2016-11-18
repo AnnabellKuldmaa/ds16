@@ -1,20 +1,20 @@
 import sys
 from PyQt5 import QtWidgets, QtCore
 from GUI_client import Ui_MainWindow
-from Queue import Queue
+#from Queue import Queue
+from multiprocessing import Queue
 import responses as rsp
 from client import Client
 from socket import socket, AF_INET, SOCK_STREAM
 import traceback
 import time
 
-
-
 class txteditor_GUI(Ui_MainWindow):
     def __init__(self, dialog):
         Ui_MainWindow.__init__(self)
         self.setupUi(dialog)
         self.current_file = '0'
+        self.is_locked = False
 
         # tie GUI events to actions defined in methods
         self.main_text_edit.textChanged.connect(self.read_text)
@@ -33,7 +33,7 @@ class txteditor_GUI(Ui_MainWindow):
         self.network_thread.new_filelist.connect(self.list_files)
 
     def connect_server(self):
-        print "connecting"
+        print ("connecting")
         srv_addr = self.IP_edit.text()
         username = self.user_edit.text()
         try:
@@ -45,8 +45,8 @@ class txteditor_GUI(Ui_MainWindow):
             self.connect_btn.setEnabled(False)
 
             self.network_thread._protocol_rcv(response_message)
-        except socket.error, e:
-            print "Socket error ({0}): {1}".format(e.errno, e.strerror)
+        except socket.error as e:
+            print ("Socket error ({0}): {1}".format(e.errno, e.strerror))
         return
 
     def __login(self, user_name):
@@ -58,12 +58,12 @@ class txteditor_GUI(Ui_MainWindow):
         return response_message
 
     def create_file(self):
-        print "new file"
+        print ("new file")
         self._s.send(rsp.make_response([rsp._CREATE_FILE]))
         return
 
     def edit_file(self):
-        print "edit file"
+        print ("edit file")
         # open selected file for editing
         self._s.send(rsp.MSG_SEP.join([rsp._OPEN_FILE, self.current_file]))
         self.main_text_edit.setEnabled(True)
@@ -71,7 +71,7 @@ class txteditor_GUI(Ui_MainWindow):
 
     def set_permissions(self):
         # give edit permissions to users
-        print "set permissions"
+        print ("set permissions")
         return
 
     def list_files(self, items):
@@ -88,25 +88,28 @@ class txteditor_GUI(Ui_MainWindow):
 
     def read_text(self):
         txt = self.main_text_edit.toPlainText()
-        self._s.send(rsp.make_response([rsp._UPDATE_FILE, self.current_file, txt]))
+        if not self.is_locked:
+            self._s.sendall(rsp.make_response([rsp._UPDATE_FILE, self.current_file, txt]))
         return
 
-    def block_writes(self):
-        self.main_text_edit.setEnabled(False)
-        time.sleep(0.5)
-        self.main_text_edit.setEnabled(True)
 
     def write_text(self, txt):
         # txt = (write input here)
-        print('UI RECEIVED txt>', txt)
-        self.main_text_edit.setPlainText(txt)
-
+        try:
+            print('UI RECEIVED txt>', txt)
+            self.is_locked = True
+            self.main_text_edit.setReadOnly(True)
+            self.main_text_edit.setPlainText(txt)
+            self.main_text_edit.setReadOnly(False)
+            print ('Releasing lock')
+            self.is_locked = False
+        except Exception as e:
+            traceback.print_exc()
         return
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QMainWindow()
-
     txteditor = txteditor_GUI(dialog)
     dialog.show()
     sys.exit(app.exec_())
