@@ -1,5 +1,3 @@
-from socket import AF_INET, SOCK_STREAM, socket
-import sys
 import os
 WORK_DIR = os.getcwd()
 import responses as rsp
@@ -13,9 +11,11 @@ import multiprocessing
 
 
 class Client(QThread):
-    def __init__(self):
+
+    def __init__(self, socket):
             #TODO IO is user interface
         QThread.__init__(self)
+        self._s = socket
     
     def _session_rcv(self):
         '''Receive the block of data till next block separator'''
@@ -73,7 +73,7 @@ class Client(QThread):
             return
 
     def __close(self):
-         self._s.close()
+        self._s.close()
 
     def run(self):
         self.network_loop()

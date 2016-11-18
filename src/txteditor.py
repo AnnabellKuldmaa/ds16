@@ -1,11 +1,11 @@
-
-from PyQt5 import QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from GUI_client import Ui_MainWindow
 from Queue import Queue
 import responses as rsp
 from client import Client, listen_ui
 from socket import socket, AF_INET, SOCK_STREAM
 import traceback
+import sys
 
 
 class txteditor_GUI(Ui_MainWindow):
@@ -24,7 +24,6 @@ class txteditor_GUI(Ui_MainWindow):
         self.queue = Queue()
 
         self.network_thread = Client()
-        self.comms_thread = listen_ui(self.queue)
 
 
 
@@ -130,7 +129,6 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
 if __name__ == "__main__":
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QMainWindow()
 
