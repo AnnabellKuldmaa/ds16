@@ -38,6 +38,7 @@ class txteditor_GUI(Ui_MainWindow):
     def edit_file(self):
         print "edit file"
         # open selected file for editing
+        self.queue.put(rsp.MSG_SEP.join([rsp._OPEN_FILE, self.current_file]))
         return
 
     def set_permissions(self):
@@ -50,7 +51,7 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
     def add_file_cbox(self, item):
-        self.comboBox.addItem(item)
+        self.comboBox.addItems(item)
         self.comboBox.update()
         print('Added item to cbox')
         print(item)
@@ -61,9 +62,10 @@ class txteditor_GUI(Ui_MainWindow):
         self.queue.put(rsp.make_response([rsp._UPDATE_FILE, self.current_file, txt]))
         return
 
-    def write_text(self):
+    def write_text(self, txt):
         # txt = (write input here)
-        # self.main_text_edit.setPlainText(txt)
+        print('UI RECEIVED txt>', txt)
+        self.main_text_edit.setPlainText(txt)
         return
 
 if __name__ == "__main__":
@@ -72,6 +74,6 @@ if __name__ == "__main__":
     dialog = QtWidgets.QMainWindow()
 
     txteditor = txteditor_GUI(dialog)
-
     dialog.show()
+    txteditor.main_text_edit.setPlainText('tetessssttt')
     sys.exit(app.exec_())

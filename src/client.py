@@ -1,6 +1,8 @@
 from socket import AF_INET, SOCK_STREAM, socket
 import sys
-sys.path.append('/home/markus/git/ds16/GUI')
+import os
+WORK_DIR = os.getcwd()
+sys.path.append(os.path.join(WORK_DIR, 'GUI'))
 import responses as rsp
 import txteditor
 from threading import Thread
@@ -56,10 +58,21 @@ class Client():
         server notifications and request/responses separately'''
         print("proto recv", message)
         message = message.split(rsp.MSG_SEP)
+        print('message')
+        print(message)
         req_code = message[0]
-        msg_content = message[1:].remove(rsp.SPACE_INVADER)
+        print('req_code')
+        print(req_code)
+        msg_content = message[1:]
+        msg_content.remove(rsp.SPACE_INVADER)
+        print('msg_content')
+        print(msg_content)
         if req_code == rsp._FILE_NAME:
-            self._io.add_file_cbox(msg_content) #Won't send created file
+            self._io.add_file_cbox(msg_content) 
+        if req_code == rsp._UPDATE_FILE:
+            print('client received', msg_content)
+            # TODO> SEE TEXTBOX OLEMA DISABLED
+            self._io.write_text(msg_content[0]) 
 
         # self._s.send('asdasd')
         # if req_code == 

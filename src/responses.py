@@ -14,6 +14,7 @@ _OPEN_FILE = '06'
 _EDIT_PERMISSION = '07'
 _CONNECT = '08'
 _FILE_NAME = '09'
+_FILE_CONTENT = '10'
 
 def make_response(args):
     return MSG_SEP.join(args + [SPACE_INVADER])
