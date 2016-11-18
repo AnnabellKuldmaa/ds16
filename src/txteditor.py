@@ -27,21 +27,26 @@ class txteditor_GUI(Ui_MainWindow):
         self.network_thread = Client()
 
         # Signals from thread
+        # Thread emits to these variables. Connection here handles what to call on emit.
         self.network_thread.new_filename.connect(self.add_file_cbox)
         self.network_thread.new_text.connect(self.write_text)
+        self.network_thread.new_filelist.connect(self.list_files)
 
     def connect_server(self):
         print "connecting"
         srv_addr = self.IP_edit.text()
         username = self.user_edit.text()
-        self._s = socket(AF_INET, SOCK_STREAM)
-        self._s.connect((srv_addr, 7777))
-        response_message = self.__login(username)
-        self.network_thread.connect(self._s)
-        self.network_thread.start()
+        try:
+            self._s = socket(AF_INET, SOCK_STREAM)
+            self._s.connect((srv_addr, 7777))
+            response_message = self.__login(username)
+            self.network_thread.connect(self._s)
+            self.network_thread.start()
+            self.connect_btn.setEnabled(False)
 
-        self.network_thread._protocol_rcv(response_message)
-
+            self.network_thread._protocol_rcv(response_message)
+        except socket.error, e:
+            print "Socket error ({0}): {1}".format(e.errno, e.strerror)
         return
 
     def __login(self, user_name):
@@ -70,7 +75,8 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
     def list_files(self, items):
-        # listen to message about new files from client
+        self.comboBox.clear()
+        self.add_file_cbox(items)
         return
 
     def add_file_cbox(self, item):

@@ -89,15 +89,6 @@ def broadcast_text(server_socket, sock, filename):
                 #del online_clients[socket]
 
 
-def request_user(user_name):
-    if user_name in user_dict:  # return file list if username exists
-        response = rsp.make_response([rsp._FILE_LIST] + user_dict[user_name])
-    else:  # else add user to dict
-        user_dict[user_name] = []
-        response = rsp._RESP_OK
-    return response
-
-
 def edit_file(args):
     """
     Changes contents of the file
@@ -117,7 +108,7 @@ def create_file(user_name):
     else:
         max_nr = 0
     file_dict[str(max_nr)] = ''
-    user_dict[str(max_nr)].add(user_name)
+    user_dict[user_name].add(str(max_nr))
     print('File created, ', str(max_nr))
     return rsp.make_response([rsp._FILE_NAME, str(max_nr)])
 
@@ -192,7 +183,7 @@ if __name__ == '__main__':
                     online_clients[u_name] = sockfd
                     print(online_clients)
                     print "Client (%s, %s) connected" % addr
-
+                    print(user_dict)
                     message = rsp.make_response([rsp._FILE_LIST] + list(user_dict[u_name]))
                     sockfd.send(message)
 

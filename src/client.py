@@ -1,12 +1,15 @@
 import responses as rsp
 from PyQt5.QtCore import QThread, pyqtSignal
 import traceback
-import multiprocessing
 
 
 class Client(QThread):
 
+    # Bound signals for sending stuff to main thread.
+    # Call emit on these when something needs to be sent
+    # Don't forget to connect on main thread
     new_filename = pyqtSignal(list)
+    new_filelist = pyqtSignal(list)
     new_text = pyqtSignal(str)
 
     def __init__(self):
@@ -56,6 +59,8 @@ class Client(QThread):
             print('client received', msg_content)
             # TODO> SEE TEXTBOX OLEMA DISABLED
             self.new_text.emit(msg_content[0])
+        if req_code == rsp._FILE_LIST:
+            self.new_filelist.emit(msg_content)
 
         print 'processing message'
         # return
@@ -77,30 +82,3 @@ class Client(QThread):
 
     def run(self):
         self.network_loop()
-
-
-class listen_ui(QThread):
-
-    def __init__(self, queue, client):
-        QThread.__init__(self)
-        self.queue = queue
-        self.client = client
-
-    def handle_command(self, command):
-        command = command.split(rsp.MSG_SEP)
-        if command[0] == rsp._CONNECT:
-            self.client.connect(command[1], command[2])
-            network_thread = multiprocessing.Process(name='UIThread', target=client.network_loop)
-            network_thread.start()
-        else:
-            self.client._s.send(rsp.MSG_SEP.join(command))
-
-    def run(self):
-        while True:
-            try:
-                command = self.queue.get(block=False)
-                self.handle_command(command)
-                print('Command received %s' % command)
-            except Exception, e:
-                pass
-
