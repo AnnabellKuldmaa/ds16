@@ -1,25 +1,27 @@
-import os
-WORK_DIR = os.getcwd()
 import responses as rsp
-import txteditor
-from threading import Thread
-from Queue import Queue
-from PyQt5 import  QtWidgets
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, pyqtSignal
 import traceback
 import multiprocessing
 
 
 class Client(QThread):
 
-    def __init__(self, socket):
+    new_filename = pyqtSignal(list)
+    new_text = pyqtSignal(str)
+
+    def __init__(self):
             #TODO IO is user interface
         QThread.__init__(self)
+        self._s = None # No socket at init
+
+    def connect(self, socket):
         self._s = socket
-    
+        print('Socket added to client')
+        return
+
     def _session_rcv(self):
         '''Receive the block of data till next block separator'''
-        m,b = '',''
+        m, b = '', ''
         try:
             b = self._s.recv(rsp.BUFFER_SIZE)
             m += b
@@ -34,7 +36,7 @@ class Client(QThread):
             m = ''
         return m
 
-    def __protocol_rcv(self,message):
+    def _protocol_rcv(self,message):
         '''Processe received message:
         server notifications and request/responses separately'''
         print("proto recv", message)
@@ -49,14 +51,12 @@ class Client(QThread):
         print('msg_content')
         print(msg_content)
         if req_code == rsp._FILE_NAME:
-            self._io.add_file_cbox(msg_content) 
+            self.new_filename.emit(msg_content)
         if req_code == rsp._UPDATE_FILE:
             print('client received', msg_content)
             # TODO> SEE TEXTBOX OLEMA DISABLED
-            self._io.write_text(msg_content[0]) 
+            self.new_text.emit(msg_content[0])
 
-        # self._s.send('asdasd')
-        # if req_code == 
         print 'processing message'
         # return
     
@@ -67,7 +67,7 @@ class Client(QThread):
                 m = self._session_rcv()
                 if len(m) <= 0:
                     break
-                self.__protocol_rcv(m)
+                self._protocol_rcv(m)
 
         except KeyboardInterrupt:
             return
@@ -104,29 +104,3 @@ class listen_ui(QThread):
             except Exception, e:
                 pass
 
-
-
-if __name__ == '__main__':
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    dialog = QtWidgets.QMainWindow()
-    dialog.show()
-
-    io = txteditor.txteditor_GUI(dialog, ui_queue)
-
-    client = Client(io)
-
-    #srv_addr = '127.0.0.1'
-    #client.connect(srv_addr, 'Markus')
-
-
-    #ui_listener_thread = listen_ui(ui_queue, client)
-
-    ui_listener_thread.start()
-
-    # TODO
-    sys.exit(app.exec_())
-
-    print 'Terminating'
-
-    
