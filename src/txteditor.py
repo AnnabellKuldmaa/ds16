@@ -28,8 +28,7 @@ class txteditor_GUI(Ui_MainWindow):
 
         # Signals from thread
         self.network_thread.new_filename.connect(self.add_file_cbox)
-        #self.connect(self.thread, SIGNAL("terminated()"), self.updateUi)
-
+        self.network_thread.new_text.connect(self.write_text)
 
     def connect_server(self):
         print "connecting"
@@ -70,7 +69,7 @@ class txteditor_GUI(Ui_MainWindow):
         print "set permissions"
         return
 
-    def list_files(self):
+    def list_files(self, items):
         # listen to message about new files from client
         return
 
