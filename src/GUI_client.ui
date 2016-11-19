@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>597</height>
+    <width>934</width>
+    <height>660</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>20</x>
       <y>50</y>
-      <width>761</width>
-      <height>501</height>
+      <width>891</width>
+      <height>581</height>
      </rect>
     </property>
    </widget>
@@ -50,17 +50,17 @@
      <string>New File</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="perm_btn">
+   <widget class="QPushButton" name="set_perm_btn">
     <property name="geometry">
      <rect>
-      <x>580</x>
+      <x>680</x>
       <y>10</y>
-      <width>75</width>
+      <width>91</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>Permissions</string>
+     <string>Set permissions</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="IP_edit">
@@ -121,11 +121,27 @@
    <widget class="QLineEdit" name="perm_edit">
     <property name="geometry">
      <rect>
-      <x>660</x>
+      <x>780</x>
       <y>10</y>
-      <width>113</width>
-      <height>20</height>
+      <width>131</width>
+      <height>21</height>
      </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Users with permissions</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="get_perm_btn">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>10</y>
+      <width>91</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Get permissions</string>
     </property>
    </widget>
   </widget>
