@@ -29,7 +29,7 @@ class txteditor_GUI(Ui_MainWindow):
         self.get_perm_btn.clicked.connect(self.get_permissions)
         self.open_btn.clicked.connect(self.edit_file)
         self.open_btn.clicked.connect(self.show_current_file)
-        #self.open_btn.clicked.connect(self.change_window_title)
+        self.comboBox.currentIndexChanged.connect(self.set_buttons_perm)
 
         self.queue = Queue()
         self.network_thread = Client()
@@ -44,6 +44,21 @@ class txteditor_GUI(Ui_MainWindow):
     def show_current_file(self):
         curr_file = self.comboBox.currentText()
         self.statusbar.showMessage("Currently open file: "+curr_file)
+
+    def set_buttons_perm(self):
+        if self.comboBox.count() > 0:
+            self.open_btn.setEnabled(True)
+            self.comboBox.setEnabled(True)
+            self.get_perm_btn.setEnabled(True)
+            self.main_text_edit.setEnabled(True)
+        elif self.comboBox.count() == 0:
+            self.open_btn.setEnabled(False)
+            self.comboBox.setEnabled(False)
+            self.get_perm_btn.setEnabled(False)
+            self.main_text_edit.setEnabled(False)
+            #TODO
+            #add possibility to clear window of text when user loses permission
+            #self.main_text_edit.clear()
 
 
     def enable_connection_btn(self):
@@ -66,16 +81,26 @@ class txteditor_GUI(Ui_MainWindow):
             response_message = self.__login(username)
             self.network_thread.connect(self._s)
             self.network_thread.start()
-            
+
+            if self.comboBox.count() == 0:
+                self.newfile_btn.setEnabled(True)
+            elif self.comboBox.count() > 0:
+                self.comboBox.setEnabled(True)
+                self.newfile_btn.setEnabled(True)
+                self.open_btn.setEnabled(True)
+                self.get_perm_btn.setEnabled(True)
+
             self.connect_btn.setEnabled(False)
             self.IP_edit.setEnabled(False)
             self.user_edit.setEnabled(False)
-            self.comboBox.setEnabled(True)
-            self.newfile_btn.setEnabled(True)
-            self.open_btn.setEnabled(True)
-            self.get_perm_btn.setEnabled(True)
+
+            #self.comboBox.setEnabled(True)
+            #self.newfile_btn.setEnabled(True)
+            #self.open_btn.setEnabled(True)
+            #self.get_perm_btn.setEnabled(True)
 
             self.network_thread._protocol_rcv(response_message)
+
         except Exception as e:
             print traceback.print_exc()
         return
@@ -91,6 +116,12 @@ class txteditor_GUI(Ui_MainWindow):
     def create_file(self):
         print ("new file")
         self._s.send(rsp.make_response([rsp._CREATE_FILE]))
+
+        self.comboBox.setEnabled(True)
+        self.newfile_btn.setEnabled(True)
+        self.open_btn.setEnabled(True)
+        self.get_perm_btn.setEnabled(True)
+
         return
 
     def edit_file(self):
@@ -178,6 +209,15 @@ if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QMainWindow()
     txteditor = txteditor_GUI(dialog)
+
     txteditor.connect_btn.setEnabled(False)
+    txteditor.main_text_edit.setEnabled(False)
+    txteditor.set_perm_btn.setEnabled(False)
+    txteditor.get_perm_btn.setEnabled(False)
+    txteditor.perm_edit.setEnabled(False)
+    txteditor.newfile_btn.setEnabled(False)
+    txteditor.comboBox.setEnabled(False)
+    txteditor.open_btn.setEnabled(False)
+
     dialog.show()
     sys.exit(app.exec_())
