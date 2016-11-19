@@ -79,7 +79,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Cooperative editor"))
         self.connect_btn.setText(_translate("MainWindow", "Connect"))
         self.newfile_btn.setText(_translate("MainWindow", "New File"))
         self.set_perm_btn.setText(_translate("MainWindow", "Set permissions"))
@@ -88,7 +88,6 @@ class Ui_MainWindow(object):
         self.open_btn.setText(_translate("MainWindow", "Edit File"))
         self.perm_edit.setPlaceholderText(_translate("MainWindow", "Users with permissions"))
         self.get_perm_btn.setText(_translate("MainWindow", "Get permissions"))
-
 
 if __name__ == "__main__":
     import sys
