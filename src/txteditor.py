@@ -21,6 +21,8 @@ class txteditor_GUI(Ui_MainWindow):
 
         # tie GUI events to actions defined in methods
         self.main_text_edit.textChanged.connect(self.read_text)
+        self.user_edit.textChanged.connect(self.enable_connection)
+        self.IP_edit.textChanged.connect(self.enable_connection)
         self.connect_btn.clicked.connect(self.connect_server)
         self.newfile_btn.clicked.connect(self.create_file)
         self.set_perm_btn.clicked.connect(self.set_permissions)
@@ -36,6 +38,16 @@ class txteditor_GUI(Ui_MainWindow):
         self.network_thread.new_text.connect(self.write_text)
         self.network_thread.new_filelist.connect(self.list_files)
         self.network_thread.new_perm.connect(self.set_perm_text)
+
+    def enable_connection_button(self):
+        srv_addr = self.IP_edit.text()
+        username = self.user_edit.text()
+
+        if len(srv_addr) != 0 and len(username) != 0:
+            self.connect_btn.setEnabled(True)
+        else:
+            self.connect_btn.setEnabled(False)
+
 
     def connect_server(self):
         print ("connecting")
@@ -155,8 +167,10 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
 if __name__ == "__main__":
+
     app = QtWidgets.QApplication(sys.argv)
     dialog = QtWidgets.QMainWindow()
     txteditor = txteditor_GUI(dialog)
+    txteditor.connect_btn.setEnabled(False)
     dialog.show()
     sys.exit(app.exec_())
