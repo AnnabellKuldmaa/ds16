@@ -42,7 +42,7 @@ def broadcast_file_list(server_socket, sock):
         # send the message only to peer
         if socket != server_socket and socket != sock:
             try:
-                print('socket send, data>', [rsp._UPDATE_FILE, list(user_dict[client])])
+                print('socket send, data>', [rsp._FILE_LIST, list(user_dict[client])])
                 socket.send(rsp.make_response([rsp._FILE_LIST] + list(user_dict[client])))
             except:
                 # broken socket connection
@@ -128,6 +128,8 @@ def edit_permission(args):
     """
     filename = args[0]
     userlist = args[1:]
+    if rsp.SPACE_INVADER in userlist:
+        userlist.remove(rsp.SPACE_INVADER)
     print ('Editing permissions for file', filename)
     print ('New user list', userlist)
     for u_name in user_dict.keys():
