@@ -152,7 +152,7 @@ class txteditor_GUI(Ui_MainWindow):
             print('Typed usernames:', txt)
             print('Split usernames:', permitted_user_list)
             permitted_user_list = rsp.make_response(permitted_user_list)
-            self._s.send(rsp.make_response([rsp._SET_PERM, str(self.comboBox.currentText()), permitted_user_list]))
+            self._s.send(rsp.make_response([rsp._SET_PERM, str(self.comboBox.currentText()),permitted_user_list]))
         except Exception as e:
             traceback.print_exc()
         return
@@ -181,6 +181,7 @@ class txteditor_GUI(Ui_MainWindow):
     def list_files(self, items):
         self.comboBox.clear()
         self.add_file_cbox(items)
+        #TODO:if open close file and update open file
         return
 
     def add_file_cbox(self, item):

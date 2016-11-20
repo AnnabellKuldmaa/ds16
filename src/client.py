@@ -58,14 +58,11 @@ class Client(QThread):
             self.new_filename.emit(msg_content)
         elif req_code in [rsp._UPDATE_FILE, rsp._FILE_CONTENT]:
             print('client received', msg_content)
-            # TODO> SEE TEXTBOX OLEMA DISABLED
             self.new_text.emit(msg_content[0])
         elif req_code == rsp._FILE_LIST:
             self.new_filelist.emit(msg_content)
         elif req_code == rsp._PERM_LIST:
-            self.new_perm.emit(msg_content[0])
-
-
+            self.new_perm.emit(','.join(msg_content))
         print ('processing message')
         # return
     
