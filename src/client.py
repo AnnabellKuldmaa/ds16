@@ -15,7 +15,6 @@ class Client(QThread):
 
 
     def __init__(self):
-            #TODO IO is user interface
         QThread.__init__(self)
         self._s = None # No socket at init
 

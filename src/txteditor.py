@@ -17,7 +17,7 @@ class txteditor_GUI(Ui_MainWindow):
     def __init__(self, dialog):
         Ui_MainWindow.__init__(self)
         self.setupUi(dialog)
-        self.current_file = None#TODO
+        self.current_file = None
         self.is_locked = False
 
         # tie GUI events to actions defined in methods
