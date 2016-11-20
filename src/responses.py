@@ -20,3 +20,12 @@ _SET_PERM = '12'
 
 def make_response(args):
     return MSG_SEP.join(args + [SPACE_INVADER])
+
+def sanitize_message(args):
+    """
+    Takes a message, splits it on MSG_SEP and removes SPACE_INVADER
+    """
+    print("Sanitizing:", args)
+    message = args.split(MSG_SEP)
+    message.remove(SPACE_INVADER)
+    return message

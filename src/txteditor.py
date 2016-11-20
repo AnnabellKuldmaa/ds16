@@ -2,6 +2,7 @@ from multiprocessing import Queue
 from socket import socket, AF_INET, SOCK_STREAM
 import sys
 import time
+import re
 import traceback
 
 from PyQt5 import QtWidgets, QtCore
@@ -73,7 +74,6 @@ class txteditor_GUI(Ui_MainWindow):
         else:
             self.connect_btn.setEnabled(False)
 
-
     def connect_server(self):
         print ("connecting")
         srv_addr = self.IP_edit.text()
@@ -109,7 +109,7 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
     def __login(self, user_name):
-        send_message = rsp.MSG_SEP.join([rsp._GET_FILES] + [user_name])
+        send_message = rsp.make_response([rsp._GET_FILES] + [user_name])
         print('Sending message: ', send_message)
         self._s.send(send_message)
         response_message = self._s.recv(rsp.BUFFER_SIZE)
@@ -131,7 +131,7 @@ class txteditor_GUI(Ui_MainWindow):
         print ("edit file")
         # open selected file for editing
         self.current_file = str(self.comboBox.currentText())
-        self._s.send(rsp.MSG_SEP.join([rsp._OPEN_FILE, self.current_file]))
+        self._s.send(rsp.make_response([rsp._OPEN_FILE, self.current_file]))
         self.main_text_edit.setEnabled(True)
         return
 
@@ -148,7 +148,11 @@ class txteditor_GUI(Ui_MainWindow):
             self.set_perm_btn.setEnabled(False)
         
             print ("Set permissions", txt)
-            self._s.send(rsp.MSG_SEP.join([rsp._SET_PERM,str(self.comboBox.currentText()),txt]))
+            permitted_user_list = re.split(r'[,; :]+', txt)
+            print('Typed usernames:', txt)
+            print('Split usernames:', permitted_user_list)
+            permitted_user_list = rsp.make_response(permitted_user_list)
+            self._s.send(rsp.make_response([rsp._SET_PERM, str(self.comboBox.currentText()), permitted_user_list]))
         except Exception as e:
             traceback.print_exc()
         return
@@ -170,7 +174,7 @@ class txteditor_GUI(Ui_MainWindow):
         self.newfile_btn.setEnabled(False)
         self.open_btn.setEnabled(False)
         self.get_perm_btn.setEnabled(False)
-        self._s.send(rsp.MSG_SEP.join([rsp._GET_PERM,str(self.comboBox.currentText())]))
+        self._s.send(rsp.make_response([rsp._GET_PERM, str(self.comboBox.currentText())]))
         print ("get permissions")
         return
 

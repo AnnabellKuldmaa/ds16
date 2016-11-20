@@ -31,23 +31,7 @@ def get_message(sock):
     return message
 
 
-def handle_client(sock):
-    while True:
-        message = get_message(sock)
-        message = message.split(rsp.MSG_SEP)
-        req_code = message[0]
-
-        if len(message) > 1:
-            action = command_dict[req_code]  # Get action from dict
-            response = action(message[1:])
-        else:
-            response = command_dict[message]
-
-        sock.send(response)
-
-
 def create_message(code, msg):
-
     return rsp.make_response([code] + msg)
 
 
@@ -56,8 +40,9 @@ def broadcast_file_list(server_socket, sock):
     for client, socket in online_clients.items():
         print(client)
         # send the message only to peer
-        if socket != server_socket:
+        if socket != server_socket and socket != sock:
             try:
+                print('socket send, data>', [rsp._UPDATE_FILE, list(user_dict[client])])
                 socket.send(rsp.make_response([rsp._FILE_LIST] + list(user_dict[client])))
             except:
                 # broken socket connection
@@ -97,8 +82,6 @@ def edit_file(args):
         -file content
     """
     file_dict[args[0]] = args[1]
-    # TODO:
-    # - do broadcast somewhere
     return rsp.make_response([rsp._RESP_OK])
 
 
@@ -156,17 +139,16 @@ def edit_permission(args):
                 user_dict[u_name].remove(filename)
             except KeyError:
                 continue
+    # Also add permissions to users not yet seen by the server
+    for u_name in userlist:
+        if u_name not in user_dict:
+            user_dict[u_name].add(filename)
     print (user_dict)
+
 
 def request_user():
     return
 
-#command_dict = {rsp._GET_FILES: request_user,
-#                rsp._EDIT_FILE: edit_file,
-#                rsp._CREATE_FILE: create_file,
-#                #rsp._UPDATE_FILE: broadcast,
-#                rsp._OPEN_FILE: open_file,
-#                rsp._EDIT_PERMISSION: edit_permission}
 
 import time
 if __name__ == '__main__':
@@ -190,8 +172,8 @@ if __name__ == '__main__':
                     sockfd, addr = s.accept()
                     print ('Tulen!')
                     SOCKET_LIST.append(sockfd)
-                    message = sockfd.recv(rsp.BUFFER_SIZE)
-                    message = message.split(rsp.MSG_SEP)
+                    message = sockfd.recv(rsp.BUFFER_SIZE)  # We assume username is shorter than buffer
+                    message = rsp.sanitize_message(message)
                     req_code = message[0]
                     u_name = message[1]
                     online_clients[u_name] = sockfd
@@ -214,7 +196,7 @@ if __name__ == '__main__':
                             
                         message = final_message
                         print('SERVER RECEIVENG MSG:', message)
-                        message = message.split(rsp.MSG_SEP)
+                        message = rsp.sanitize_message(message)
                         req_code = message[0]
                         message = message[1:]
 
@@ -240,15 +222,7 @@ if __name__ == '__main__':
                         print(file_dict)
 
                         sock.send(response)
-                    #sock.send('yolo')
-                #broadcast(server_socket, sockfd, "[%s:%s] entered our chatting room\n" % addr)
             time.sleep(0.01)
-            #client_socket, client_addr = s.accept()
-            #SOCKET_LIST.append(client_socket)
-            #handle_client(client_socket)
-            #print 'New client connected from %s:%d' % client_addr
-            #print 'Local end-point socket bound on: %s:%d' % client_socket.getsockname()
-            # Wait for user input before terminating application
 
     except Exception as e:
 

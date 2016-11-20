@@ -45,14 +45,13 @@ class Client(QThread):
         '''Processe received message:
         server notifications and request/responses separately'''
         print("proto recv", message)
-        message = message.split(rsp.MSG_SEP)
+        message = rsp.sanitize_message(message)
         print('message')
         print(message)
         req_code = message[0]
         print('req_code')
         print(req_code)
         msg_content = message[1:]
-        msg_content.remove(rsp.SPACE_INVADER)
         print('msg_content')
         print(msg_content)
         if req_code == rsp._FILE_NAME:
