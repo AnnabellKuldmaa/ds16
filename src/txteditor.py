@@ -55,14 +55,13 @@ class txteditor_GUI(Ui_MainWindow):
             self.set_perm_btn.setEnabled(False)
             self.perm_edit.clear()
             self.perm_edit.setEnabled(False)
+        if self.comboBox.count() == 1:
+            self.main_text_edit.setEnabled(False)
         elif self.comboBox.count() == 0:
             self.open_btn.setEnabled(False)
             self.comboBox.setEnabled(False)
             self.get_perm_btn.setEnabled(False)
-            self.main_text_edit.setEnabled(False)
-            #TODO
-            #add possibility to clear window of text when user loses permission
-            #self.main_text_edit.clear()
+
 
 
     def enable_connection_btn(self):
@@ -97,11 +96,6 @@ class txteditor_GUI(Ui_MainWindow):
             self.IP_edit.setEnabled(False)
             self.user_edit.setEnabled(False)
 
-            #self.comboBox.setEnabled(True)
-            #self.newfile_btn.setEnabled(True)
-            #self.open_btn.setEnabled(True)
-            #self.get_perm_btn.setEnabled(True)
-
             self.network_thread._protocol_rcv(response_message)
 
         except Exception as e:
@@ -124,6 +118,7 @@ class txteditor_GUI(Ui_MainWindow):
         self.newfile_btn.setEnabled(True)
         self.open_btn.setEnabled(True)
         self.get_perm_btn.setEnabled(True)
+
 
         return
 
