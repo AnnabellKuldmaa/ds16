@@ -197,15 +197,20 @@ class txteditor_GUI(Ui_MainWindow):
             self._s.sendall(rsp.make_response([rsp._UPDATE_FILE, self.current_file, txt]))
         return
 
+    def set_readwrite(self):
+        #self.main_text_edit.setReadOnly(False)
+        print('Maderfaker')
+        self.main_text_edit.setEnabled(True)
 
     def write_text(self, txt):
-        # txt = (write input here)
+        timer = QtCore.QTimer()
         try:
             print('UI RECEIVED txt>', txt)
             self.is_locked = True
-            self.main_text_edit.setReadOnly(True)
+            #self.main_text_edit.setReadOnly(True)
+            self.main_text_edit.setEnabled(False)
             self.main_text_edit.setPlainText(txt)
-            self.main_text_edit.setReadOnly(False)
+            timer.singleShot(1000, self.set_readwrite)
             print ('Releasing lock')
             self.is_locked = False
         except Exception as e:
