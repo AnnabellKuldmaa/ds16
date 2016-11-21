@@ -140,6 +140,7 @@ class txteditor_GUI(Ui_MainWindow):
             self.open_btn.setEnabled(True)
             self.get_perm_btn.setEnabled(True)
             self.set_perm_btn.setEnabled(False)
+
         
             print ("Set permissions", txt)
             permitted_user_list = re.split(r'[,; :]+', txt)
@@ -168,6 +169,7 @@ class txteditor_GUI(Ui_MainWindow):
         self.newfile_btn.setEnabled(False)
         self.open_btn.setEnabled(False)
         self.get_perm_btn.setEnabled(False)
+        self.main_text_edit.setEnabled(False)
         self._s.send(rsp.make_response([rsp._GET_PERM, str(self.comboBox.currentText())]))
         print ("get permissions")
         return
