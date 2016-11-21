@@ -51,7 +51,6 @@ class txteditor_GUI(Ui_MainWindow):
             self.open_btn.setEnabled(True)
             self.comboBox.setEnabled(True)
             self.get_perm_btn.setEnabled(True)
-            self.main_text_edit.setEnabled(True)
             self.set_perm_btn.setEnabled(False)
             self.perm_edit.clear()
             self.perm_edit.setEnabled(False)
