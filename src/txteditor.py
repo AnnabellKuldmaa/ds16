@@ -31,6 +31,9 @@ class txteditor_GUI(Ui_MainWindow):
         self.open_btn.clicked.connect(self.edit_file)
         self.open_btn.clicked.connect(self.show_current_file)
         self.comboBox.currentIndexChanged.connect(self.set_buttons_perm)
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.set_readwrite)
+
 
         self.queue = Queue()
         self.network_thread = Client()
@@ -194,19 +197,17 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
     def set_readwrite(self):
-        #self.main_text_edit.setReadOnly(False)
-        print('Maderfaker')
-        self.main_text_edit.setEnabled(True)
+        self.main_text_edit.setReadOnly(False)
+        self.timer.stop()
 
     def write_text(self, txt):
-        timer = QtCore.QTimer()
         try:
             print('UI RECEIVED txt>', txt)
             self.is_locked = True
-            #self.main_text_edit.setReadOnly(True)
-            self.main_text_edit.setEnabled(False)
+            self.main_text_edit.setReadOnly(True)
             self.main_text_edit.setPlainText(txt)
-            timer.singleShot(1000, self.set_readwrite)
+            self.timer.stop()
+            self.timer.start(300)
             print ('Releasing lock')
             self.is_locked = False
         except Exception as e:
