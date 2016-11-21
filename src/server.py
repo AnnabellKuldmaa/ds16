@@ -132,7 +132,6 @@ def edit_permission(args):
         userlist.remove(rsp.SPACE_INVADER)
     print ('Editing permissions for file', filename)
     print ('New user list', userlist)
-    #TODO: tundmatuid peab ka saama lisad? user ei pruugi selle hetkel olemas olla
     for u_name in user_dict.keys():
         if u_name in userlist:
             user_dict[u_name].add(filename)
