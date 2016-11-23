@@ -17,6 +17,7 @@ _FILE_NAME = '09'
 _FILE_CONTENT = '10'
 _PERM_LIST = '11'
 _SET_PERM = '12'
+_USERNAME_TAKEN = '13'
 
 def make_response(args):
     return MSG_SEP.join(args + [SPACE_INVADER])

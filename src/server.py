@@ -175,11 +175,17 @@ if __name__ == '__main__':
                     # Login choice
                     sockfd, addr = s.accept()
                     print ('Tulen!')
-                    SOCKET_LIST.append(sockfd)
                     message = sockfd.recv(rsp.BUFFER_SIZE)  # We assume username is shorter than buffer
                     message = rsp.sanitize_message(message)
                     req_code = message[0]
                     u_name = message[1]
+
+                    if u_name in online_clients:
+                        message = rsp.make_response([rsp._USERNAME_TAKEN])
+                        sockfd.send(message)
+                        break
+
+                    SOCKET_LIST.append(sockfd)
                     online_clients[u_name] = sockfd
                     print(online_clients)
                     print ("Client (%s, %s) connected" % addr)

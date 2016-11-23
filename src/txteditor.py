@@ -83,6 +83,13 @@ class txteditor_GUI(Ui_MainWindow):
             self._s = socket(AF_INET, SOCK_STREAM)
             self._s.connect((srv_addr, 7777))
             response_message = self.__login(username)
+
+            req_code = rsp.sanitize_message(response_message)[0]
+            if req_code == rsp._USERNAME_TAKEN:
+                print "\n\n\nUSERNAME ALREADY EXISTS, CHOOSE A NEW ONE.\n\n\n"
+                self._s.close()
+                return
+
             self.network_thread.connect(self._s)
             self.network_thread.start()
 
@@ -110,6 +117,7 @@ class txteditor_GUI(Ui_MainWindow):
         self._s.send(send_message)
         response_message = self._s.recv(rsp.BUFFER_SIZE)
         print('Message received: ', response_message)
+
         return response_message
 
     def create_file(self):
