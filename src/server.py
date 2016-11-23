@@ -12,11 +12,6 @@ online_clients = {} #clients -> sockets
 open_files = defaultdict(list) # filename: [user_sock1, ..]
 
 
-"""
-open_files_dict[filename] = [usernames]
-"""
-open_files_dict = {}
-
 SOCKET_LIST = []
 
 
@@ -157,7 +152,7 @@ def remove_user_presence(sock):
         if socket == sock:
             del online_clients[client]
     # Remove client from list of users having a file open
-    for filename, socket_list in open_files_dict.items():
+    for filename, socket_list in open_files.items():
         if socket in socket_list:
             socket_list.remove(socket)
     # Remove client from SOCKET_LIST
