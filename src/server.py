@@ -151,6 +151,20 @@ def request_user():
     return
 
 
+def remove_user_presence(sock):
+    # Remove client from online clients
+    for client, socket in online_clients.items():
+        if socket == sock:
+            del online_clients[client]
+    # Remove client from list of users having a file open
+    for filename, socket_list in open_files_dict.items():
+        if socket in socket_list:
+            socket_list.remove(socket)
+    # Remove client from SOCKET_LIST
+    try:
+        SOCKET_LIST.remove(sock)
+    except ValueError:
+        pass
 
 
 import time
