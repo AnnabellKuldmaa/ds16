@@ -26,10 +26,6 @@ def get_message(sock):
     return message
 
 
-def create_message(code, msg):
-    return rsp.make_response([code] + msg)
-
-
 def broadcast_file_list(server_socket, sock):
     print('Broadcasting')
     for client, socket in online_clients.items():
@@ -43,8 +39,7 @@ def broadcast_file_list(server_socket, sock):
                 # broken socket connection
                 socket.close()
                 # broken socket, remove it
-                if socket in SOCKET_LIST:
-                    SOCKET_LIST.remove(socket)
+                remove_user_presence(sock)
 
 
 def broadcast_text(server_socket, sock, filename):
@@ -62,11 +57,9 @@ def broadcast_text(server_socket, sock, filename):
                 print('socket send error broadacst text')
                 # broken socket connection
                 traceback.print_exc()                
-                socket.close()
+
                 # broken socket, remove it
-                if socket in SOCKET_LIST:
-                    SOCKET_LIST.remove(socket)
-                #del online_clients[socket]
+                remove_user_presence(sock)
 
 
 def edit_file(args):
@@ -106,6 +99,7 @@ def open_file(filename, sock):
     print('open_files', open_files)
     return rsp.make_response([rsp._FILE_CONTENT, file_dict[filename]])
 
+
 def get_perm(filename):
     user_list = []
     for u_name in user_dict.keys():
@@ -142,10 +136,6 @@ def edit_permission(args):
     print (user_dict)
 
 
-def request_user():
-    return
-
-
 def remove_user_presence(sock):
     # Remove client from online clients
     for client, socket in online_clients.items():
@@ -160,6 +150,8 @@ def remove_user_presence(sock):
         SOCKET_LIST.remove(sock)
     except ValueError:
         pass
+
+    socket.close()
 
 
 import time
@@ -237,6 +229,9 @@ if __name__ == '__main__':
                         print(file_dict)
 
                         sock.send(response)
+                    else:
+                        remove_user_presence(sock)
+                        print('User disconnected. Presence removed.')
             time.sleep(0.01)
 
     except Exception as e:
