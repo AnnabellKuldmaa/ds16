@@ -178,6 +178,10 @@ class txteditor_GUI(Ui_MainWindow):
     def list_files(self, items):
         self.comboBox.clear()
         self.add_file_cbox(items)
+        self.main_text_edit.textChanged.disconnect(self.read_text)
+        self.main_text_edit.clear()
+        self.main_text_edit.textChanged.connect(self.read_text)
+        self.main_text_edit.setEnabled(False)
         #TODO:if open close file and update open file
         return
 

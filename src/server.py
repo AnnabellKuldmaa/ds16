@@ -151,6 +151,8 @@ def request_user():
     return
 
 
+
+
 import time
 if __name__ == '__main__':
     print ('Running')
@@ -216,7 +218,10 @@ if __name__ == '__main__':
                         elif req_code == rsp._SET_PERM:
                             edit_permission(message)
                             broadcast_file_list(s, sock)
-                            response = rsp.make_response([rsp._RESP_OK])
+                            client = [client for client, socket in online_clients.items() if socket == sock][0]
+                            print('NEW LIST FOR CLIENT:', client, user_dict[client])
+                            response = rsp.make_response([rsp._FILE_LIST] + list(user_dict[client]))
+
                             #TODO brodcast new file list
                         else:
                             continue
