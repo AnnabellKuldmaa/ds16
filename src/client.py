@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from socket import AF_INET, SOCK_STREAM, socket
 import sys
 import os
@@ -13,80 +14,86 @@ from Queue import Queue
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QThread
 import time
+=======
+import responses as rsp
+from PyQt5.QtCore import QThread, pyqtSignal
+>>>>>>> paleodieet
 import traceback
-import multiprocessing
 
 
-class Client():
-    def __init__(self,io):
-            #TODO IO is user interface
+class Client(QThread):
 
-        self._io = io
+    # Bound signals for sending stuff to main thread.
+    # Call emit on these when something needs to be sent
+    # Don't forget to connect on main thread
+    new_filename = pyqtSignal(list)
+    new_filelist = pyqtSignal(list)
+    new_text = pyqtSignal(str)
+    new_perm = pyqtSignal(str)
 
-    def connect(self,srv_addr, user_name):
-        '''Connect to server, start game session'''
-        self._s = socket(AF_INET,SOCK_STREAM)
-        self._s.connect((srv_addr, 7777))
-        response_message = self.__login(user_name)
-        self.__protocol_rcv(response_message)
 
-    
-    def __login(self, user_name):
-        send_message = rsp.MSG_SEP.join([rsp._GET_FILES] + [user_name])
-        print('Sending message: ', send_message)
-        self._s.send(send_message)
-        response_message = self._s.recv(rsp.BUFFER_SIZE)
-        print('Message received: ', response_message)
-        return response_message
-    
+    def __init__(self):
+        QThread.__init__(self)
+        self._s = None # No socket at init
+
+    def connect(self, socket):
+        self._s = socket
+        print('Socket added to client')
+        return
+
     def _session_rcv(self):
         '''Receive the block of data till next block separator'''
-        m,b = '',''
+        m, b = '', ''
         try:
             b = self._s.recv(rsp.BUFFER_SIZE)
             m += b
             while len(b) == rsp.BUFFER_SIZE and not b.endswith(rsp.SPACE_INVADER):
-                print('received', b)
+                print('Received', b)
                 b = self._s.recv(rsp.BUFFER_SIZE)
                 m += b
         except Exception:
             traceback.print_exc()
             self._s.close()
+<<<<<<< HEAD
             print ('Ctrl+C issued, terminating ...')
+=======
+            print ('Ctrl+C issued, terminating ...' )
+>>>>>>> paleodieet
             m = ''
         return m
 
-    def __protocol_rcv(self,message):
+    def _protocol_rcv(self,message):
         '''Processe received message:
         server notifications and request/responses separately'''
         print("proto recv", message)
-        message = message.split(rsp.MSG_SEP)
+        message = rsp.sanitize_message(message)
         print('message')
         print(message)
         req_code = message[0]
         print('req_code')
         print(req_code)
         msg_content = message[1:]
-        msg_content.remove(rsp.SPACE_INVADER)
         print('msg_content')
         print(msg_content)
         if req_code == rsp._FILE_NAME:
-            self._io.add_file_cbox(msg_content) 
-        if req_code == rsp._UPDATE_FILE:
+            self.new_filename.emit(msg_content)
+        elif req_code in [rsp._UPDATE_FILE, rsp._FILE_CONTENT]:
             print('client received', msg_content)
+<<<<<<< HEAD
             # TODO> SEE TEXTBOX OLEMA DISABLED
             self._io.write_text(msg_content[0]) 
 
         # self._s.send('asdasd')
         # if req_code == 
+=======
+            self.new_text.emit(msg_content[0])
+        elif req_code == rsp._FILE_LIST:
+            self.new_filelist.emit(msg_content)
+        elif req_code == rsp._PERM_LIST:
+            self.new_perm.emit(','.join(msg_content))
+>>>>>>> paleodieet
         print ('processing message')
         # return
-
-
-    def ui_loop(self):
-         while True:
-             1+1
-             #listen to UI
     
     def network_loop(self):
         try:
@@ -95,33 +102,16 @@ class Client():
                 m = self._session_rcv()
                 if len(m) <= 0:
                     break
-                self.__protocol_rcv(m)
+                self._protocol_rcv(m)
 
         except KeyboardInterrupt:
             return
 
     def __close(self):
-         self._s.close()
-
-
-class listen_ui(QThread):
-
-    def __init__(self, queue, client):
-        QThread.__init__(self)
-        self.queue = queue
-        self.client = client
-
-    def handle_command(self, command):
-        command = command.split(rsp.MSG_SEP)
-        if command[0] == rsp._CONNECT:
-            self.client.connect(command[1], command[2])
-            network_thread = multiprocessing.Process(name='UIThread', target=client.network_loop)
-            network_thread.start()
-        else:
-            self.client._s.send(rsp.MSG_SEP.join(command))
-        print('Midagi')
+        self._s.close()
 
     def run(self):
+<<<<<<< HEAD
         while True:
             try:
                 command = self.queue.get(block=False)
@@ -159,3 +149,6 @@ if __name__ == '__main__':
     print ('Terminating')
 
     
+=======
+        self.network_loop()
+>>>>>>> paleodieet
