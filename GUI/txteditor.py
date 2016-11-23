@@ -4,6 +4,7 @@ import sys
 import os
 WORK_DIR = os.getcwd()
 sys.path.append(os.path.join([WORK_DIR, 'src']))
+#sys.path.append('../src')
 import responses as rsp
 
 
@@ -22,7 +23,7 @@ class txteditor_GUI(Ui_MainWindow):
         self.open_btn.clicked.connect(self.edit_file)
 
     def connect_server(self):
-        print "connecting"
+        print ("connecting")
         socket_info = self.IP_edit.text()
         username = self.user_edit.text()
         self.queue.put(rsp.MSG_SEP.join([rsp._CONNECT, socket_info, username]))
@@ -31,19 +32,19 @@ class txteditor_GUI(Ui_MainWindow):
         return
 
     def create_file(self):
-        print "new file"
+        print ("new file")
         self.queue.put(rsp.MSG_SEP.join([rsp._CREATE_FILE]))
         return
 
     def edit_file(self):
-        print "edit file"
+        print ("edit file")
         # open selected file for editing
         self.queue.put(rsp.MSG_SEP.join([rsp._OPEN_FILE, self.current_file]))
         return
 
     def set_permissions(self):
         # give edit permissions to users
-        print "set permissions"
+        print ("set permissions")
         return
 
     def list_files(self):
